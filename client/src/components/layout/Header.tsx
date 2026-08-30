@@ -1,63 +1,60 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { BookOpen, Search, User } from "lucide-react";
+import { BookOpen, LogOutIcon, Search } from "lucide-react";
 import useAuthStore from "@/store/authStore";
+
 
 export const Header = () => {
   const location = useLocation();
   const isAuthPage = location.pathname === "/auth";
   const isArticlesPage = location.pathname === "/articles";
-  const { currentUser } = useAuthStore();
-  const isAuthenticated = !!currentUser;
+  const { currentUser, handleLogout } = useAuthStore();
+  const isAuthenticated = currentUser === null ? false : true;
+  const navigate = useNavigate();
 
   if (isAuthPage) {
     return null;
   }
 
+  console.log("cu-", currentUser)
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center gap-4">
-        <Link to="/" className="flex items-center gap-2 flex-shrink-0">
-          <BookOpen className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">
-            Writify
-          </span>
-        </Link>
+      <div className="container h-16 w-full flex items-center justify-between gap-4">
+        <div>
+          <Link to="/" className="flex items-center gap-2">
+            <BookOpen className="h-6 w-6 text-primary" />
+            <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">
+              Writify
+            </span>
+          </Link>
+        </div>
 
-        {isArticlesPage && (
-          <div className="flex-1 max-w-2xl mx-4">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Search articles..." className="pl-10" />
+        <div className={`flex items-center justify-end w-full gap-4`}>
+          {isArticlesPage && (
+            <div className="flex-1 max-w-2xl mx-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input placeholder="Search articles..." className="pl-10" />
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        <div
-          className={`flex items-center gap-4 flex-shrink-0 ${
-            !isArticlesPage ? "ml-auto" : ""
-          }`}
-        >
           {isAuthenticated ? (
-            <Link to="/profile">
-              {currentUser.avatar ? (
-                <Avatar className="h-24 w-24">
-                  <AvatarImage
-                    src={currentUser.avatar}
-                    alt={currentUser.name}
-                  />
-                  <AvatarFallback className="text-2xl">
-                    {currentUser.name}
+            <>
+              <Link to="/profile">
+                <Avatar className="h-9 w-9 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
+                  <AvatarImage src={currentUser.avatar} />
+                  <AvatarFallback>
+                    {currentUser.username.slice(0, 1).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
-              ) : (
-                <div className="border-gray-500 border-2 p-1 rounded-full">
-                  <User size={18} className="text-gray-500" />
-                </div>
-              )}
-            </Link>
+              </Link>
+              <span className="ml-2" onClick={handleLogout}>
+                <LogOutIcon />
+              </span>
+            </>
           ) : (
             <>
               <Button variant="ghost" asChild>

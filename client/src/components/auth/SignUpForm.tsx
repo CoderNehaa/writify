@@ -14,7 +14,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
-import { signUpSchema } from "@/types/yupSchema";
+import { signUpSchema } from "@/constants/yup-validator";
 import { SocialButton } from "./SocialButton";
 import GoogleIcon from "@/icons/Google";
 import FacebookIcon from "@/icons/Facebook";
@@ -32,8 +32,11 @@ const SignUpForm = () => {
   const navigate = useNavigate();
   const { mutate, isPending } = useMutation({
     mutationFn: (data: ISignUpPayload) => signupService(data),
-    onSuccess: (res) => {
-      toast.success(res.data.message);
+    onSuccess: (res: IResponse<IUser>) => {
+      localStorage.setItem(
+        "signupResponse",
+        JSON.stringify({ email: res.data.email, message: res.message })
+      );
       navigate(ROUTES_PATH.AUTH.VERIFY);
     },
   });
@@ -105,9 +108,11 @@ const SignUpForm = () => {
             <Input
               id="signup-name"
               placeholder="John Doe"
+              value={signUpFormik.values.fullName}
+              onChange={signUpFormik.handleChange("fullName")}
               {...signUpFormik.getFieldProps("fullName")}
             />
-            {signUpFormik.touched.fullName && signUpFormik.errors.fullName && (
+            {signUpFormik.errors.fullName && (
               <p className="text-sm text-destructive">
                 {signUpFormik.errors.fullName}
               </p>
@@ -120,8 +125,11 @@ const SignUpForm = () => {
                 id="signup-username"
                 placeholder="johndoe"
                 className="pr-10"
-                onChange={handleUsernameInput}
-                // {...signUpFormik.getFieldProps("username")}
+                {...signUpFormik.getFieldProps("username")}
+                onChange={(e) => {
+                  signUpFormik.handleChange(e);
+                  handleUsernameInput(e);
+                }}
               />
               <div className="absolute right-0 top-0 h-full px-3 flex items-center">
                 {checkingUsername && (
@@ -135,7 +143,7 @@ const SignUpForm = () => {
                 )}
               </div>
             </div>
-            {signUpFormik.touched.username && signUpFormik.errors.username && (
+            {signUpFormik.errors.username && (
               <p className="text-sm text-destructive">
                 {signUpFormik.errors.username}
               </p>
@@ -229,10 +237,7 @@ const SignUpForm = () => {
             className="w-full"
             variant="hero"
             disabled={
-              !signUpFormik.isValid ||
-              !signUpFormik.dirty ||
-              usernameAvailable !== true ||
-              isPending
+              !signUpFormik.isValid || usernameAvailable !== true || isPending
             }
           >
             Create Account

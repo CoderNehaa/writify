@@ -1,68 +1,44 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArticleCard } from "@/components/articles/ArticleCard";
-import { Users, FileText, Flag, User } from "lucide-react";
+import { Users, FileText, Flag, User, LogOutIcon } from "lucide-react";
 import useAuthStore from "@/store/authStore";
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { getUserByIdService } from "@/api/user";
+import { useState } from "react";
+import withAuth from "@/hoc/withAuth";
 
 const Profile = () => {
-  const { userId } = useParams();
-  const { currentUser } = useAuthStore();
-  const isOwnProfile = !userId
-    ? true
-    : userId === currentUser._id
-    ? true
-    : false;
-  const [user, setUser] = useState<IUser | null>(null);
-
-  useEffect(() => {
-    isOwnProfile
-      ? setUser(currentUser)
-      : setUser({
-          _id: "1",
-          name: "Sarah Johnson",
-          email: "sarah@johnson.com",
-          username: "sarahj",
-          avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
-          bio: "Full-stack developer passionate about web technologies. Writing about React, TypeScript, and modern web development.",
-          followersCount: 1250,
-          followingCount: 340,
-          articlesCount: 45,
-          isFollowing: false,
-        });
-  }, [userId]);
-
-  const mockArticles: IArticle[] = [
-    {
-      id: "1",
-      title: "Getting Started with React and TypeScript",
-      description:
-        "Learn how to build type-safe React applications using TypeScript.",
-      content: "",
-      author: user,
-      category: {
-        id: "1",
-        name: "Technology",
-        slug: "technology",
-        articleCount: 1250,
-      },
-      tags: ["react", "typescript", "webdev"],
-      isPaid: false,
-      likes: 234,
-      commentsCount: 45,
-      createdAt: "2024-01-15T10:00:00Z",
-      updatedAt: "2024-01-15T10:00:00Z",
-      readTime: 8,
+  const { currentUser, setCurrentUser } = useAuthStore();
+  const userId = useParams().userId || currentUser?._id || "";
+  const isOwnProfile = currentUser?._id === userId ? true : false;
+  const [articles, setArticles] = useState([]);
+  const navigate = useNavigate();
+  
+  const { data: user } = useQuery({
+    queryKey: ["user-profile", userId],
+    queryFn: async () => {
+      if (currentUser?._id == userId) {
+        return currentUser;
+      } else {
+        return await getUserByIdService(userId);
+      }
     },
-  ];
+  });
+
+  function handleLogout() {
+    setCurrentUser(null);
+    navigate("/");
+  }
 
   if (!user) {
-    return null;
+    return <div>User not found</div>;
   }
+
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -75,9 +51,9 @@ const Profile = () => {
               <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
                 {user.avatar ? (
                   <Avatar className="h-24 w-24">
-                    <AvatarImage src={user.avatar} alt={user.name} />
+                    <AvatarImage src={user.avatar} alt={user.fullName} />
                     <AvatarFallback className="text-2xl">
-                      {user.name}
+                      {user.fullName}
                     </AvatarFallback>
                   </Avatar>
                 ) : (
@@ -87,7 +63,7 @@ const Profile = () => {
                 )}
 
                 <div className="flex-1">
-                  <h1 className="text-3xl font-bold mb-1">{user.name}</h1>
+                  <h1 className="text-2xl font-bold mb-1">{user.fullName}</h1>
                   <p className="text-muted-foreground mb-2">@{user.username}</p>
                   <p className="text-foreground mb-4">{user.bio}</p>
 
@@ -149,9 +125,9 @@ const Profile = () => {
 
               <TabsContent value="articles" className="mt-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {/* {mockArticles.map((article) => (
+                  {articles.map((article) => (
                     <ArticleCard key={article.id} article={article} />
-                  ))} */}
+                  ))}
                 </div>
               </TabsContent>
 
@@ -164,6 +140,11 @@ const Profile = () => {
               )}
             </Tabs>
           </div>
+          <Button
+            onClick={handleLogout}
+            className="bg-red-600 text-white font-semibold hover:bg-red-300">
+            Logout <LogOutIcon className="font-semibold" />
+          </Button>
         </div>
       </main>
 
@@ -172,4 +153,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default withAuth(Profile);

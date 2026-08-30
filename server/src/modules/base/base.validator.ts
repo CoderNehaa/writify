@@ -35,18 +35,18 @@ const validateSection = (
   return null;
 };
 
-const validateMongoObjectId = (value: string, helpers: any) => {
-  if (!Types.ObjectId.isValid(value)) {
-    return helpers.message("Invalid MongoDB ObjectId format.");
-  }
-  return value;
-};
-
 export abstract class BaseValidator {
+  static validateMongoObjectId = (value: string, helpers: any) => {
+    if (!Types.ObjectId.isValid(value)) {
+      return helpers.message("Invalid MongoDB ObjectId format.");
+    }
+    return value;
+  };
+  
   static paramsIdValidator = {
     params: Joi.object({
       id: Joi.string()
-        .custom(validateMongoObjectId, "ObjectId Validation")
+        .custom(this.validateMongoObjectId, "ObjectId Validation")
         .required()
         .label("ID"),
     }),

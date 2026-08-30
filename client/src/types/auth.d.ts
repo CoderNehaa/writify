@@ -15,3 +15,9 @@ interface IVerifyPayload {
   email: string;
   otp: string;
 }
+
+interface ILoginResponseData {
+  user: IUser;
+  accessToken: string;
+  refreshToken: string;
+}

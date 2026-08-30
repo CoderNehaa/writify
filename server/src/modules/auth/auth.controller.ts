@@ -41,6 +41,19 @@ export class AuthController extends BaseController {
   async login(req: Request, res: Response) {
     try {
       let user = req.user;
+      if (!user.isVerified) {
+        const otp = await this.otpService.generateAndSaveOTP(user.email);
+
+        this.emailService.sendMail(
+          user.email,
+          SIGNUP_EMAIL.SUBJECT,
+          SIGNUP_EMAIL.BODY(otp, user.username)
+        );
+        return this.sendBadRequestResponse(
+          res,
+          "Account not verified! Account verification OTP sent on your email"
+        );
+      }
 
       let passwordMatches = await user.comparePassword(req.body.password);
       if (!passwordMatches) {
@@ -165,7 +178,7 @@ export class AuthController extends BaseController {
 
   async checkUsername(req: Request, res: Response) {
     const { username } = req.body;
-    let exists = await this.userService.getOne({ username });
+    let exists = await this.userService.getOne({ username, isVerified: true });
     return this.sendSuccessResponse<{ usernameAvailable: boolean }>(res, {
       usernameAvailable: exists ? false : true,
     });

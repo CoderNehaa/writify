@@ -24,7 +24,7 @@ export class UserController extends BaseController {
         return this.sendSuccessResponse(res, req.user);
       }
 
-      const user = await this.userService.getById(userId);
+      const user = await this.userService.getById(userId as string);
       return this.sendSuccessResponse(res, user);
     } catch (e) {
       return this.handleError(res, e, "getById", "UserController");
