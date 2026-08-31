@@ -15,11 +15,22 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import { updatePasswordSchema } from "@/constants/yup-validator";
 import { toast } from "react-toastify";
+import { useMutation } from "@tanstack/react-query";
+import { updatePasswordService } from "@/api/user";
 
 const UpdatePasswordModal = () => {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const { mutate, isPending } = useMutation({
+    mutationFn: (newPassword: string) => updatePasswordService(newPassword),
+    onSuccess: (res) => {
+      toast.success(res.message || "Password updated successfully!");
+      setIsPasswordModalOpen(false);
+      passwordFormik.resetForm();
+    },
+  });
 
   const passwordFormik = useFormik({
     initialValues: {
@@ -27,11 +38,8 @@ const UpdatePasswordModal = () => {
       confirmPassword: "",
     },
     validationSchema: updatePasswordSchema,
-    onSubmit: (values, { resetForm }) => {
-      // TODO: Implement actual password change
-      toast.success("Password updated successfully!");
-      setIsPasswordModalOpen(false);
-      resetForm();
+    onSubmit: (values) => {
+      mutate(values.newPassword);
     },
   });
   return (

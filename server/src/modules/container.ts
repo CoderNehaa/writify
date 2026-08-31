@@ -34,7 +34,6 @@ export const authController = new AuthController(
   emailService,
   tokenService
 );
-export const userController = new UserController(userService, s3Service);
 export const categoryController = new CategoryController(categoryService);
 export const articleController = new ArticleController(articleService);
 export const bookmarkController = new BookmarkController(bookmarkService);

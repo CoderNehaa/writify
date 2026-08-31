@@ -17,6 +17,7 @@ const CORS_ORIGIN_ENV = process.env.CORS_ORIGIN;
 export const CORS_ORIGIN = CORS_ORIGIN_ENV?.split(",")
   .map((v) => v)
   .filter((v) => v);
+export const NODE_ENV = process.env.NODE_ENV || 'development';
 
 // AWS
 export const AWS_REGION = process.env.AWS_REGION || "";

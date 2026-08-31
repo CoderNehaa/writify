@@ -5,6 +5,7 @@ interface IUser {
   fullName: string;
   avatar?: string;
   bio?: string;
+  isVerified?: boolean;
   isPremium?: boolean;
   createdAt?: string;
   followersCount?: number;

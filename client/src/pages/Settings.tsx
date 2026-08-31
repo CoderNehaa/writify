@@ -25,14 +25,14 @@ import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { ROUTES_PATH } from "@/utils/routesPath";
 import withAuth from "@/hoc/withAuth";
-import { deleteUserByIdService, updateUserByIdService } from "@/api/user";
+import { deleteUserService, updateUserByIdService } from "@/api/user";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { currentUser, setCurrentUser } = useAuthStore();
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const { mutate: deleteMutate, isPending: deletePending } = useMutation({
-    mutationFn: () => deleteUserByIdService(currentUser._id),
+    mutationFn: () => deleteUserService(),
     onSuccess: (res) => {
       toast.success(res.message || "Account deleted successfully!");
       setCurrentUser(null);
@@ -41,7 +41,7 @@ const Settings = () => {
   });
 
   const { mutate: updateMutate, isPending: updatePending } = useMutation({
-    mutationFn: (payload: FormData) => updateUserByIdService(currentUser._id, payload),
+    mutationFn: (payload: FormData) => updateUserByIdService(payload),
     onSuccess: (res) => {
       toast.success(res.message || "Account updated successfully!");
     },

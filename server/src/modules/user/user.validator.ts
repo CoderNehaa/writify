@@ -25,16 +25,19 @@ export class UserValidator {
           .string()
           .allow(...Object.values(EUserRoles))
           .default(EUserRoles.USER),
-        bio: joi.string().max(50),
+        bio: joi.string().max(50).allow(""),
+        fullName: joi.string().trim().min(1),
       })
       .min(1),
   };
   static updatePasswordValidator = {
-    newPassword: joi
-      .string()
-      .min(PASSWORD_LENGTH.MIN)
-      .max(PASSWORD_LENGTH.MAX)
-      .pattern(passwordRegex)
-      .required(),
+    body: joi.object({
+      newPassword: joi
+        .string()
+        .min(PASSWORD_LENGTH.MIN)
+        .max(PASSWORD_LENGTH.MAX)
+        .pattern(passwordRegex)
+        .required(),
+    }),
   };
 }

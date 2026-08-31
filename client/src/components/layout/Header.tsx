@@ -18,7 +18,6 @@ export const Header = () => {
     return null;
   }
 
-  console.log("cu-", currentUser)
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container h-16 w-full flex items-center justify-between gap-4">
@@ -45,9 +44,9 @@ export const Header = () => {
             <>
               <Link to="/profile">
                 <Avatar className="h-9 w-9 cursor-pointer hover:ring-2 hover:ring-primary transition-all">
-                  <AvatarImage src={currentUser.avatar} />
+                  <AvatarImage src={currentUser?.avatar} />
                   <AvatarFallback>
-                    {currentUser.username.slice(0, 1).toUpperCase()}
+                    {currentUser?.username.slice(0, 1).toUpperCase()}
                   </AvatarFallback>
                 </Avatar>
               </Link>

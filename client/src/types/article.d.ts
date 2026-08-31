@@ -1,46 +1,43 @@
 interface IArticle {
-  id: string;
+  _id: string;
   title: string;
-  description: string;
   content: string;
-  author: Author;
-  category: Category;
+  author: IAuthor;
+  category: ICategory;
   tags: string[];
-  isPaid: boolean;
+  isDraft?: boolean;
+  isPaid?: boolean;
   coinPrice?: number;
-  likes: number;
-  commentsCount: number;
+  likes?: number;
+  commentsCount?: number;
   createdAt: string;
-  updatedAt: string;
+  updatedAt?: string;
   coverImage?: string;
-  readTime: number;
   isBookmarked?: boolean;
 }
 
 interface IAuthor {
-  id: string;
-  name: string;
+  _id: string;
+  fullName: string;
   username: string;
   avatar?: string;
   bio?: string;
-  followersCount: number;
-  followingCount: number;
-  articlesCount: number;
+  followersCount?: number;
+  followingCount?: number;
+  articlesCount?: number;
   isFollowing?: boolean;
 }
 
 interface ICategory {
-  id: string;
-  name: string;
-  slug: string;
-  description?: string;
-  articleCount: number;
+  _id: string;
+  categoryName: string;
+  articleCount?: number;
 }
 
 interface IComment {
-  id: string;
+  _id: string;
   content: string;
-  author: Author;
+  author: IAuthor;
   createdAt: string;
   likes: number;
 }
@@ -50,4 +47,21 @@ interface IArticleFilters {
   category?: string;
   tags?: string[];
   isPaid?: boolean;
+  author?: string;
+}
+
+interface ICreateArticlePayload {
+  title: string;
+  content: string;
+  category: string;
+  tags: string[];
+  coverImage?: string;
+  isDraft?: boolean;
+}
+
+interface IBookmark {
+  _id: string;
+  articleId: IArticle | string;
+  userId: string;
+  createdAt?: string;
 }

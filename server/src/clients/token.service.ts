@@ -1,7 +1,8 @@
 import jwt from "jsonwebtoken";
-import { Response } from "express";
+import { CookieOptions, Response } from "express";
 import {
   ACCESS_TOKEN_SECRET_KEY,
+  NODE_ENV,
   REFRESH_TOKEN_SECRET_KEY,
 } from "../config/environment";
 import {
@@ -10,6 +11,13 @@ import {
   REFRESH_TOKEN_EXPIRY_TIME,
   REFRESH_TOKEN_NAME,
 } from "../constants/auth";
+
+const cookieOptions = (): CookieOptions => ({
+  httpOnly: true,
+  sameSite: "lax",
+  path: "/",
+  secure: NODE_ENV === "production",
+});
 
 export class TokenService {
   generateAndSaveAuthTokens = async (res: Response, userId: string) => {
@@ -21,8 +29,8 @@ export class TokenService {
       expiresIn: REFRESH_TOKEN_EXPIRY_TIME,
     });
     // Save access and refresh token in cookies
-    res.cookie(ACCESS_TOKEN_NAME, accessToken);
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken);
+    res.cookie(ACCESS_TOKEN_NAME, accessToken, cookieOptions());
+    res.cookie(REFRESH_TOKEN_NAME, refreshToken, cookieOptions());
     return { accessToken, refreshToken };
   };
 
@@ -66,15 +74,7 @@ export class TokenService {
   };
 
   clearCookies(res: Response) {
-    res.clearCookie(ACCESS_TOKEN_NAME, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-    });
-    res.clearCookie(REFRESH_TOKEN_NAME, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-    });
+    res.clearCookie(ACCESS_TOKEN_NAME, cookieOptions());
+    res.clearCookie(REFRESH_TOKEN_NAME, cookieOptions());
   }
 }

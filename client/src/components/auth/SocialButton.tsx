@@ -10,7 +10,7 @@ export const SocialButton = ({
 }) => {
   const handleSocialLogin = () => {
     // TODO: Implement OAuth    
-    toast.info(`${provider} login will be implemented with Lovable Cloud`);
+    toast.info(`${provider} login will be implemented`);
   };
 
   return (

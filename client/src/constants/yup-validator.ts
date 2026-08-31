@@ -49,6 +49,7 @@ export const updateAccountSchema = Yup.object({
     .required("Username is required"),
 
   bio: Yup.string().max(50, "Bio must not exceed 50 characters"),
+  fullName: Yup.string().required("Full name is required"),
 });
 
 export const updatePasswordSchema = Yup.object({

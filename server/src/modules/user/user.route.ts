@@ -7,7 +7,7 @@ import upload from "../../clients/multer.service";
 
 const userRouter = Router();
 const { validateEndpoint } = BaseValidator;
-const { updateUserValidator } = UserValidator;
+const { updateUserValidator, updatePasswordValidator } = UserValidator;
 
 userRouter.use(authMiddleware.authentic);
 
@@ -22,6 +22,10 @@ userRouter.put(
 );
 userRouter.delete("/", validateEndpoint(), userController.deleteUser);
 
-userRouter.patch("/password", validateEndpoint(), userController.resetPassword);
+userRouter.patch(
+  "/password",
+  validateEndpoint(updatePasswordValidator),
+  userController.resetPassword
+);
 
 export default userRouter;

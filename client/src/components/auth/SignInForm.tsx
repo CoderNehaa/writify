@@ -18,20 +18,39 @@ import { SocialButton } from "./SocialButton";
 import GoogleIcon from "@/icons/Google";
 import FacebookIcon from "@/icons/Facebook";
 import { useMutation } from "@tanstack/react-query";
-import { signinService } from "@/api/auth";
+import { forgotPasswordService, signinService } from "@/api/auth";
 import { toast } from "react-toastify";
 import useAuthStore from "@/store/authStore";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 const SignInForm = () => {
   const navigate = useNavigate();
   const { setCurrentUser } = useAuthStore();
   const [showSignInPassword, setShowSignInPassword] = useState(false);
+  const [forgotOpen, setForgotOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const { mutate: forgotMutate, isPending: forgotPending } = useMutation({
+    mutationFn: (email: string) => forgotPasswordService(email),
+    onSuccess: (res) => {
+      toast.success(res.message || "New password sent to your email");
+      setForgotOpen(false);
+      setForgotEmail("");
+    },
+  });
+
   const { mutate, isPending } = useMutation({
     mutationFn: (data: ISignInPayload) => signinService(data),
     onSuccess: (res) => {
-      toast.success("Signed in successfully!");
+      toast.success(res.message || "Signed in successfully!");
       navigate("/");
-      setCurrentUser(res.data);
+      setCurrentUser(res.data?.user ?? null);
     },
   });
 
@@ -123,12 +142,50 @@ const SignInForm = () => {
             Sign In
           </Button>
           <div className="text-center">
-            <Button type="button" variant="link" size="sm">
+            <Button
+              type="button"
+              variant="link"
+              size="sm"
+              onClick={() => setForgotOpen(true)}
+            >
               Forgot password?
             </Button>
           </div>
         </form>
       </CardContent>
+
+      <Dialog open={forgotOpen} onOpenChange={setForgotOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Reset password</DialogTitle>
+            <DialogDescription>
+              Enter your account email. We will send a new password if the
+              account exists.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Label htmlFor="forgot-email">Email</Label>
+            <Input
+              id="forgot-email"
+              type="email"
+              placeholder="name@example.com"
+              value={forgotEmail}
+              onChange={(e) => setForgotEmail(e.target.value)}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setForgotOpen(false)}>
+              Cancel
+            </Button>
+            <Button
+              disabled={!forgotEmail || forgotPending}
+              onClick={() => forgotMutate(forgotEmail)}
+            >
+              Send reset email
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };

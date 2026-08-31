@@ -28,16 +28,23 @@ const Verify = () => {
   });
 
   useEffect(() => {
-    const temp = JSON.parse(localStorage.getItem("signupResponse"));
-    if (!temp.email && !temp.message) {
+    try {
+      const raw = localStorage.getItem("signupResponse");
+      const temp = raw ? JSON.parse(raw) : null;
+      if (!temp?.email) {
+        toast.error("Email is required for verification");
+        navigate(ROUTES_PATH.AUTH.LOGIN);
+        return;
+      }
+      setSignupData({
+        email: temp.email,
+        message: temp.message || "",
+      });
+    } catch {
       toast.error("Email is required for verification");
       navigate(ROUTES_PATH.AUTH.LOGIN);
     }
-    setSignupData({
-      email: temp.email,
-      message: temp.message,
-    });
-  }, []);
+  }, [navigate]);
 
   const { mutate, isPending } = useMutation({
     mutationFn: verifyAccountService,

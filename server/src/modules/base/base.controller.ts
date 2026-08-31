@@ -83,7 +83,6 @@ export abstract class BaseController {
   }
 
   printError(error: unknown, fnName?: string, fileName?: string) {
-    console.log(error);
     console.log(
       `Error in fn ${fnName} in file ${fileName}: ${JSON.stringify(error)}`
     );
