@@ -1,3 +1,15 @@
-import { Document } from "mongoose";
+import { Document, Types } from "mongoose";
 
-export interface IArticle extends Document {}
+export enum EArticleStatus {
+  DRAFT = "draft",
+  PUBLISHED = "published",
+}
+
+export interface IArticle extends Document {
+  title: string;
+  content: string;
+  coverImage?: string;
+  category: Types.ObjectId;
+  author: Types.ObjectId;
+  status: EArticleStatus;
+}

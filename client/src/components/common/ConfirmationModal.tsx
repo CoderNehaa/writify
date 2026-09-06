@@ -23,7 +23,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onCancel}>
-      <DialogContent className="border rounded-lg p-3 w-[400px]">
+      <DialogContent className="border rounded-lg p-3 w-[calc(100%-2rem)] max-w-[400px]">
         <DialogHeader>
           <DialogTitle className="!text-lg p-5 font-semibold leading-7 text-center">
             {text}

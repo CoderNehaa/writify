@@ -32,7 +32,7 @@ export class BookmarkController extends BaseController {
   getById = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const data = await this.bookmarkService.getById(id);
+      const data = await this.bookmarkService.getById(String(id));
       if (!data) {
         return this.sendNotFoundResponse(res);
       }
@@ -65,7 +65,7 @@ export class BookmarkController extends BaseController {
   deleteById = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const data = await this.bookmarkService.deleteById(id);
+      const data = await this.bookmarkService.deleteById(String(id));
 
       return this.sendSuccessResponse(
         res,

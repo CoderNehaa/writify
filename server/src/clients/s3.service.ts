@@ -2,6 +2,7 @@ import {
   S3Client,
   PutObjectCommand,
   DeleteObjectCommand,
+  GetObjectCommand,
 } from "@aws-sdk/client-s3";
 import { ReadStream } from "fs";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -108,5 +109,32 @@ export class S3Service {
     return getSignedUrl(this.s3Client, command, {
       expiresIn: 10 * 60, // 10 minutes
     });
+  }
+
+  /**
+   * Generate a time-limited presigned URL to read a private object —
+   * used instead of making the bucket/objects public.
+   */
+  async getPresignedDownloadUrl(
+    key: string,
+    expiresInSeconds = 24 * 60 * 60 // 24h: long enough that most browsing
+    // sessions never see it expire, short enough to stay "temporary".
+  ): Promise<string> {
+    const command = new GetObjectCommand({ Bucket: this.bucket, Key: key });
+    return getSignedUrl(this.s3Client, command, {
+      expiresIn: expiresInSeconds,
+    });
+  }
+
+  /**
+   * Turn a stored avatar/coverImage value into something the browser can
+   * actually load: pass external URLs through unchanged (e.g. a Google
+   * account's profile picture, or a legacy public S3 URL from before this
+   * bucket went private), and presign anything else as an S3 key.
+   */
+  async resolveUrl(value?: string | null): Promise<string | undefined> {
+    if (!value) return value ?? undefined;
+    if (/^https?:\/\//i.test(value)) return value;
+    return this.getPresignedDownloadUrl(value);
   }
 }

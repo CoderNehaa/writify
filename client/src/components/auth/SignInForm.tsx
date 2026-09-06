@@ -14,9 +14,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff } from "lucide-react";
 import { signInSchema } from "@/constants/yup-validator";
-import { SocialButton } from "./SocialButton";
-import GoogleIcon from "@/icons/Google";
-import FacebookIcon from "@/icons/Facebook";
+import { GoogleLoginButton } from "./GoogleLoginButton";
 import { useMutation } from "@tanstack/react-query";
 import { forgotPasswordService, signinService } from "@/api/auth";
 import { toast } from "react-toastify";
@@ -74,8 +72,7 @@ const SignInForm = () => {
       <CardContent>
         <form onSubmit={signInFormik.handleSubmit} className="space-y-4">
           <div className="space-y-3">
-            <SocialButton provider="Google" icon={<GoogleIcon />} />
-            <SocialButton provider="Facebook" icon={<FacebookIcon />} />
+            <GoogleLoginButton />
           </div>
 
           <div className="relative">

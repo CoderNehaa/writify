@@ -59,7 +59,7 @@ export const HeroSection = () => {
             </Button>
           </div>
 
-          <div className="mt-12 grid grid-cols-3 gap-8 max-w-2xl mx-auto">
+          <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto">
             <div className="text-center">
               <p className="text-3xl font-bold text-primary">10K+</p>
               <p className="text-sm text-muted-foreground">Active Writers</p>

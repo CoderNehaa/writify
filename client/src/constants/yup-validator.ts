@@ -6,7 +6,7 @@ export const signInSchema = Yup.object({
     .required("Email is required"),
   password: Yup.string()
     .min(6, "Password must be at least 6 characters")
-    .max(8, "Password must not exceed 8 characters")
+    .max(12, "Password must not exceed 12 characters")
     .required("Password is required"),
 });
 
@@ -25,7 +25,7 @@ export const signUpSchema = Yup.object({
     .required("Email is required"),
   password: Yup.string()
     .min(6, "Password must be at least 6 characters")
-    .max(8, "Password must not exceed 8 characters")
+    .max(12, "Password must not exceed 12 characters")
     .required("Password is required"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("password")], "Passwords must match")
@@ -53,9 +53,14 @@ export const updateAccountSchema = Yup.object({
 });
 
 export const updatePasswordSchema = Yup.object({
+  currentPassword: Yup.string().required("Current password is required"),
   newPassword: Yup.string()
     .min(6, "Password must be at least 6 characters")
-    .max(8, "Password must not exceed 8 characters")
+    .max(12, "Password must not exceed 12 characters")
+    .notOneOf(
+      [Yup.ref("currentPassword")],
+      "New password must be different from current password"
+    )
     .required("New password is required"),
   confirmPassword: Yup.string()
     .oneOf([Yup.ref("newPassword")], "Passwords must match")

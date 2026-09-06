@@ -1,4 +1,5 @@
 import { Response } from "express";
+import logger from "../../utils/logger";
 
 export abstract class BaseController {
   // This method can be used for both cases - success and error
@@ -83,8 +84,10 @@ export abstract class BaseController {
   }
 
   printError(error: unknown, fnName?: string, fileName?: string) {
-    console.log(
-      `Error in fn ${fnName} in file ${fileName}: ${JSON.stringify(error)}`
+    logger.error(
+      `Error in fn ${fnName} in file ${fileName}: ${
+        error instanceof Error ? error.stack || error.message : JSON.stringify(error)
+      }`
     );
   }
 }

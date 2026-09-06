@@ -1,14 +1,7 @@
 import { Link } from "react-router-dom";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getCategoriesService } from "@/api/category";
@@ -34,31 +27,23 @@ const Categories = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {categories?.map((category) => (
               <Link
-                key={category.id}
-                to={`/articles?category=${category.categoryName}`}
+                key={category._id}
+                to={`/articles?category=${category._id}`}
                 className="group"
               >
                 <Card className="h-full hover-lift border-0 overflow-hidden transition-all">
-                  <div className={`h-1.5 bg-gradient-to-r`} />
-                  <CardHeader className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                  <div className={`h-2 bg-gradient-to-r`} />
+                  <CardHeader className="p-8">
+                    <div className="flex items-center justify-between gap-2">
+                      <CardTitle className="text-2xl group-hover:text-primary transition-colors">
                         {category.categoryName}
                       </CardTitle>
-                      <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
+                      <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-primary group-hover:translate-x-1 transition-all flex-shrink-0" />
                     </div>
-                    {/* <CardDescription className="text-sm line-clamp-2">
-                      {category.description}
-                    </CardDescription> */}
                   </CardHeader>
-                  <CardContent className="p-4 pt-0">
-                    <Badge variant="secondary" className="text-xs">
-                      {category.articleCount || 0} Articles
-                    </Badge>
-                  </CardContent>
                 </Card>
               </Link>
             ))}

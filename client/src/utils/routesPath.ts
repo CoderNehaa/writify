@@ -13,7 +13,6 @@ export const ROUTES_PATH = {
   CATEGORIES: "/categories",
   PROFILE: (userId: string = "") => `/profile/${userId}`,
   SETTINGS: "/settings",
-  BOOKMARKS: "/bookmarks",
   ABOUT: "/about",
   CONTACT: "/contact",
   PRIVACY: "/privacy",

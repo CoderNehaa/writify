@@ -17,29 +17,47 @@ import { updatePasswordSchema } from "@/constants/yup-validator";
 import { toast } from "react-toastify";
 import { useMutation } from "@tanstack/react-query";
 import { updatePasswordService } from "@/api/user";
+import useAuthStore from "@/store/authStore";
 
 const UpdatePasswordModal = () => {
+  const { handleLogout } = useAuthStore();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const { mutate, isPending } = useMutation({
-    mutationFn: (newPassword: string) => updatePasswordService(newPassword),
+    mutationFn: ({
+      currentPassword,
+      newPassword,
+    }: {
+      currentPassword: string;
+      newPassword: string;
+    }) => updatePasswordService(currentPassword, newPassword),
     onSuccess: (res) => {
-      toast.success(res.message || "Password updated successfully!");
+      toast.success(
+        res.message || "Password updated. Please log in again with your new password."
+      );
       setIsPasswordModalOpen(false);
       passwordFormik.resetForm();
+      // The backend revokes the session on password change — log out
+      // locally too instead of leaving a now-invalid session in place.
+      handleLogout();
     },
   });
 
   const passwordFormik = useFormik({
     initialValues: {
+      currentPassword: "",
       newPassword: "",
       confirmPassword: "",
     },
     validationSchema: updatePasswordSchema,
     onSubmit: (values) => {
-      mutate(values.newPassword);
+      mutate({
+        currentPassword: values.currentPassword,
+        newPassword: values.newPassword,
+      });
     },
   });
   return (
@@ -56,6 +74,41 @@ const UpdatePasswordModal = () => {
           <DialogDescription>Enter your new password below</DialogDescription>
         </DialogHeader>
         <form onSubmit={passwordFormik.handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="currentPassword">Current Password</Label>
+            <div className="relative">
+              <Input
+                id="currentPassword"
+                name="currentPassword"
+                type={showCurrentPassword ? "text" : "password"}
+                placeholder="Enter current password"
+                value={passwordFormik.values.currentPassword}
+                onChange={passwordFormik.handleChange}
+                onBlur={passwordFormik.handleBlur}
+                className="pr-10"
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+              >
+                {showCurrentPassword ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+            </div>
+            {passwordFormik.touched.currentPassword &&
+              passwordFormik.errors.currentPassword && (
+                <p className="text-sm text-destructive">
+                  {passwordFormik.errors.currentPassword}
+                </p>
+              )}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="newPassword">New Password</Label>
             <div className="relative">

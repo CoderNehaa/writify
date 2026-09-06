@@ -15,9 +15,7 @@ import { Separator } from "@/components/ui/separator";
 import { Eye, EyeOff, CheckCircle, XCircle, Loader2 } from "lucide-react";
 import { toast } from "react-toastify";
 import { signUpSchema } from "@/constants/yup-validator";
-import { SocialButton } from "./SocialButton";
-import GoogleIcon from "@/icons/Google";
-import FacebookIcon from "@/icons/Facebook";
+import { GoogleLoginButton } from "./GoogleLoginButton";
 import { useMutation } from "@tanstack/react-query";
 import { checkUsernameService, signupService } from "@/api/auth";
 import { useDebouncedCallback } from "@/hooks/use-debounce";
@@ -88,8 +86,7 @@ const SignUpForm = () => {
       <CardContent>
         <form onSubmit={signUpFormik.handleSubmit} className="space-y-4">
           <div className="space-y-3">
-            <SocialButton provider="Google" icon={<GoogleIcon />} />
-            <SocialButton provider="Facebook" icon={<FacebookIcon />} />
+            <GoogleLoginButton />
           </div>
 
           <div className="relative">

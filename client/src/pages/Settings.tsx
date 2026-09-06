@@ -14,25 +14,32 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Checkbox } from "@/components/ui/checkbox";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Pencil, Trash2, User, X } from "lucide-react";
 import { toast } from "react-toastify";
 import useAuthStore from "@/store/authStore";
 import UpdatePasswordModal from "@/components/settings/UpdatePasswordModal";
-import ConfirmationModal from "@/components/common/ConfirmationModal";
 import { Form, Formik } from "formik";
 import { updateAccountSchema } from "@/constants/yup-validator";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { ROUTES_PATH } from "@/utils/routesPath";
-import withAuth from "@/hoc/withAuth";
 import { deleteUserService, updateUserByIdService } from "@/api/user";
 
 const Settings = () => {
   const navigate = useNavigate();
   const { currentUser, setCurrentUser } = useAuthStore();
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deleteArticlesToo, setDeleteArticlesToo] = useState(false);
   const { mutate: deleteMutate, isPending: deletePending } = useMutation({
-    mutationFn: () => deleteUserService(),
+    mutationFn: () => deleteUserService(deleteArticlesToo),
     onSuccess: (res) => {
       toast.success(res.message || "Account deleted successfully!");
       setCurrentUser(null);
@@ -44,6 +51,8 @@ const Settings = () => {
     mutationFn: (payload: FormData) => updateUserByIdService(payload),
     onSuccess: (res) => {
       toast.success(res.message || "Account updated successfully!");
+      if (res.data) setCurrentUser(res.data);
+      navigate("/profile");
     },
   });
 
@@ -58,7 +67,6 @@ const Settings = () => {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
-      console.log("No file found!");
       return;
     }
     const url = URL.createObjectURL(file);
@@ -79,7 +87,7 @@ const Settings = () => {
       formData.append("bio", values.bio);
 
       if (selectedFile) {
-        formData.append("profile", selectedFile); // TODO:backend expects "profile"
+        formData.append("profile", selectedFile);
       }
 
       await updateMutate(formData);
@@ -92,7 +100,6 @@ const Settings = () => {
     return null;
   }
 
-  // TODO:Show confirmation modal for delete
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -126,7 +133,7 @@ const Settings = () => {
                   onSubmit={handleProfileSubmit}
                   enableReinitialize={true}
                 >
-                  {({ values, handleChange }) => (
+                  {({ values, handleChange, resetForm }) => (
                     <Form className="space-y-6 mt-4">
                       {" "}
                       {/* Avatar Section */}
@@ -169,10 +176,7 @@ const Settings = () => {
                           hidden
                           ref={(ref) => (fileInputRef = ref)}
                           accept="image/*"
-                          onChange={(e) => {
-                            console.log("File Image event hit!");
-                            handleImageSelect(e);
-                          }}
+                          onChange={handleImageSelect}
                         />
                       </div>
                       <div className="space-y-2">
@@ -203,9 +207,23 @@ const Settings = () => {
                           placeholder="Tell us about yourself..."
                         />
                       </div>
-                      <Button type="submit" variant="default">
-                        Save Changes
-                      </Button>
+                      <div className="flex gap-3">
+                        <Button type="submit" variant="default" disabled={updatePending}>
+                          Save Changes
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          disabled={updatePending}
+                          onClick={() => {
+                            resetForm();
+                            setSelectedFile(null);
+                            setPreviewImage(currentUser?.avatar || null);
+                          }}
+                        >
+                          Cancel
+                        </Button>
+                      </div>
                     </Form>
                   )}
                 </Formik>
@@ -217,10 +235,7 @@ const Settings = () => {
             {/* Delete Account Section */}
             <Card className="border-destructive">
               <CardHeader>
-                <CardTitle className="text-de4structive">Danger Zone</CardTitle>
-                {/* <CardDescription>
-                  Irreversible actions for your account
-                </CardDescription> */}
+                <CardTitle className="text-destructive">Danger Zone</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">
@@ -242,12 +257,51 @@ const Settings = () => {
               </CardContent>
             </Card>
 
-            <ConfirmationModal
-              text="This action will permanently delete your data and cannot be undone. Do you want to proceed?"
+            <Dialog
               open={deleteModalVisible}
-              onCancel={() => setDeleteModalVisible(false)}
-              onConfirm={deleteMutate}
-            />
+              onOpenChange={(open) => {
+                setDeleteModalVisible(open);
+                if (!open) setDeleteArticlesToo(false);
+              }}
+            >
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Delete your account?</DialogTitle>
+                </DialogHeader>
+                <p className="text-sm text-muted-foreground">
+                  This action is permanent and cannot be undone.
+                </p>
+                <div className="flex items-start gap-2 rounded-md border p-3">
+                  <Checkbox
+                    id="delete-articles-too"
+                    checked={deleteArticlesToo}
+                    onCheckedChange={(checked) => setDeleteArticlesToo(checked === true)}
+                  />
+                  <Label htmlFor="delete-articles-too" className="font-normal leading-snug">
+                    Also permanently delete all my articles. If left unchecked, your
+                    published articles will remain visible, attributed to a deleted
+                    account.
+                  </Label>
+                </div>
+                <DialogFooter>
+                  <Button
+                    variant="outline"
+                    onClick={() => setDeleteModalVisible(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    disabled={deletePending}
+                    onClick={() => deleteMutate()}
+                  >
+                    {deleteArticlesToo
+                      ? "Delete account and articles"
+                      : "Delete account"}
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
       </main>
@@ -257,4 +311,4 @@ const Settings = () => {
   );
 };
 
-export default withAuth(Settings);
+export default Settings;

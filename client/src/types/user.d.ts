@@ -6,46 +6,12 @@ interface IUser {
   avatar?: string;
   bio?: string;
   isVerified?: boolean;
-  isPremium?: boolean;
+  role?: "user" | "admin";
   createdAt?: string;
-  followersCount?: number;
-  followingCount?: number;
-  articlesCount?: number;
-  sharesRemaining?: number;
-  articlesPosted?: number;
-  isFollowing?: boolean;
 }
 
 interface IUpdateForm {
   username: string;
   bio: string;
   fullName: string;
-}
-
-interface IMembershipPlan {
-  _id: string;
-  name: string;
-  price: number;
-  interval: "monthly" | "yearly";
-  features: string[];
-  isPopular?: boolean;
-}
-
-interface ITransaction {
-  _id: string;
-  type: "membership" | "article_purchase";
-  amount: number;
-  description: string;
-  createdAt: string;
-  status: "completed" | "pending" | "failed";
-}
-
-interface INotification {
-  _id: string;
-  type: "follow" | "article" | "hashtag";
-  title: string;
-  message: string;
-  read: boolean;
-  createdAt: string;
-  link?: string;
 }

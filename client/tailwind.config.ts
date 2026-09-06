@@ -7,7 +7,14 @@ export default {
   theme: {
     container: {
       center: true,
-      padding: "2rem",
+      // A flat 2rem side padding ate ~64px of a 375px phone's width on
+      // every page (everything wraps in .container). Scale it down on
+      // small screens instead.
+      padding: {
+        DEFAULT: "1rem",
+        sm: "1.5rem",
+        lg: "2rem",
+      },
       screens: {
         "2xl": "1400px",
       },
@@ -90,5 +97,5 @@ export default {
       },
     },
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require("tailwindcss-animate"), require("@tailwindcss/typography")],
 } satisfies Config;

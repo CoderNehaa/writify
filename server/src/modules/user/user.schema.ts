@@ -46,7 +46,7 @@ const userSchema = new mongoose.Schema<IUser>(
     isDeleted: {
       type: Boolean,
       default: false,
-      select: false, // TODO:Hide in queries by default
+      select: false,
     },
     profilePicture: {
       type: String,

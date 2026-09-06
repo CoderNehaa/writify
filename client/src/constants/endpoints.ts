@@ -6,6 +6,7 @@ export const apiEndpoints = {
     checkUsername: "auth/check-username",
     verify: "auth/verify-account",
     forgotPassword: "auth/forgot-password",
+    google: "auth/google",
   },
   user: {
     userById: (id: string) => `/user/data/${id}`,
@@ -22,6 +23,7 @@ export const apiEndpoints = {
     update: (id: string) => `/article/${id}`,
     delete: (id: string) => `/article/${id}`,
   },
+  contact: "/contact",
   bookmark: {
     all: "/bookmark/all",
     create: "/bookmark/new",

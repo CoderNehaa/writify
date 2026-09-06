@@ -8,9 +8,13 @@ import {
 import {
   ACCESS_TOKEN_EXPIRY_TIME,
   ACCESS_TOKEN_NAME,
+  REFRESH_TOKEN_EXPIRY_SECONDS,
   REFRESH_TOKEN_EXPIRY_TIME,
   REFRESH_TOKEN_NAME,
 } from "../constants/auth";
+import { redisClient } from "./redis.client";
+
+const refreshTokenRedisKey = (userId: string) => `refresh_token:${userId}`;
 
 const cookieOptions = (): CookieOptions => ({
   httpOnly: true,
@@ -31,6 +35,14 @@ export class TokenService {
     // Save access and refresh token in cookies
     res.cookie(ACCESS_TOKEN_NAME, accessToken, cookieOptions());
     res.cookie(REFRESH_TOKEN_NAME, refreshToken, cookieOptions());
+
+    // Store the currently-valid refresh token so it can be revoked
+    // server-side on logout/password-change, instead of staying valid
+    // until natural expiry.
+    await redisClient.set(refreshTokenRedisKey(userId), refreshToken, {
+      EX: REFRESH_TOKEN_EXPIRY_SECONDS,
+    });
+
     return { accessToken, refreshToken };
   };
 
@@ -60,6 +72,14 @@ export class TokenService {
         };
 
         if (decoded.id) {
+          const storedRefreshToken = await redisClient.get(
+            refreshTokenRedisKey(decoded.id)
+          );
+          if (storedRefreshToken !== refreshToken) {
+            // Token has been revoked (logout / password change) or rotated elsewhere.
+            return null;
+          }
+
           const tokens = await this.generateAndSaveAuthTokens(res, decoded.id);
           refreshToken = tokens.refreshToken;
           accessToken = tokens.accessToken;
@@ -71,6 +91,10 @@ export class TokenService {
     }
 
     return null;
+  };
+
+  revokeRefreshToken = async (userId: string) => {
+    await redisClient.del(refreshTokenRedisKey(userId));
   };
 
   clearCookies(res: Response) {

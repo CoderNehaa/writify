@@ -36,3 +36,9 @@ export const forgotPasswordService = async (
 ): Promise<IResponse<IUser>> => {
   return await apiInstance.post(apiEndpoints.auth.forgotPassword, { email });
 };
+
+export const googleLoginService = async (
+  idToken: string
+): Promise<IResponse<ILoginResponseData>> => {
+  return await apiInstance.post(apiEndpoints.auth.google, { idToken });
+};

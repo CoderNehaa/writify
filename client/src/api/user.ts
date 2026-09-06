@@ -7,8 +7,12 @@ export const getUserByIdService = async (
   return await apiInstance.get(apiEndpoints.user.userById(userId));
 };
 
-export const deleteUserService = async (): Promise<IResponse<IUser>> => {
-  return await apiInstance.delete(apiEndpoints.user.deleteUser);
+export const deleteUserService = async (
+  deleteArticles = false
+): Promise<IResponse<IUser>> => {
+  return await apiInstance.delete(apiEndpoints.user.deleteUser, {
+    data: { deleteArticles },
+  });
 };
 
 export const getProfileService = async (): Promise<IResponse<IUser>> => {
@@ -22,9 +26,11 @@ export const updateUserByIdService = async (
 };
 
 export const updatePasswordService = async (
+  currentPassword: string,
   newPassword: string
 ): Promise<IResponse<IUser>> => {
   return await apiInstance.patch(apiEndpoints.user.updatePassword, {
+    currentPassword,
     newPassword,
   });
 };

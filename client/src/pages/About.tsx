@@ -3,8 +3,10 @@ import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { BookOpen, Users, TrendingUp, Heart } from "lucide-react";
 import { Link } from "react-router-dom";
+import useAuthStore from "@/store/authStore";
 
 const About = () => {
+  const { currentUser } = useAuthStore();
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -80,7 +82,9 @@ const About = () => {
 
               <div className="flex gap-4 justify-center mt-8">
                 <Button variant="hero" size="lg" asChild>
-                  <Link to="/auth?mode=signup">Start Writing Today</Link>
+                  <Link to={currentUser ? "/write" : "/auth?mode=signup"}>
+                    Start Writing Today
+                  </Link>
                 </Button>
                 <Button variant="outline" size="lg" asChild>
                   <Link to="/contact">Contact Us</Link>

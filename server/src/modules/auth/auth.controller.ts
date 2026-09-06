@@ -1,13 +1,22 @@
+import jwt from "jsonwebtoken";
+import mongoose from "mongoose";
 import { Request, Response } from "express";
+import { OAuth2Client } from "google-auth-library";
+
 import { BaseController } from "../base/base.controller";
 import { UserService } from "../user/user.service";
 import { OTPService } from "../otp/otp.service";
-import mongoose from "mongoose";
-import { AUTH_RESPONSE_MESSAGES } from "../../constants/auth";
 import { IUser } from "../user/user.type";
-import { EmailService } from "../../clients/email.service";
-import { SIGNUP_EMAIL } from "../../constants/email";
 import { TokenService } from "../../clients/token.service";
+import { EmailService } from "../../clients/email.service";
+import { S3Service } from "../../clients/s3.service";
+import { AUTH_RESPONSE_MESSAGES } from "../../constants/auth";
+import { FORGOT_PASSWORD_EMAIL, SIGNUP_EMAIL } from "../../constants/email";
+import { REFRESH_TOKEN_NAME, USERNAME_LENGTH } from "../../constants/auth";
+import {
+  GOOGLE_CLIENT_ID,
+  REFRESH_TOKEN_SECRET_KEY,
+} from "../../config/environment";
 
 const { NEW_SIGNUP, EXISTING_SIGNUP } = AUTH_RESPONSE_MESSAGES;
 
@@ -16,18 +25,23 @@ export class AuthController extends BaseController {
   private otpService: OTPService;
   private emailService: EmailService;
   private tokenService: TokenService;
+  private s3Service: S3Service;
+  private googleClient: OAuth2Client;
 
   constructor(
     userService: UserService,
     otpService: OTPService,
     emailService: EmailService,
-    tokenService: TokenService
+    tokenService: TokenService,
+    s3Service: S3Service
   ) {
     super();
     this.userService = userService;
     this.otpService = otpService;
     this.emailService = emailService;
     this.tokenService = tokenService;
+    this.s3Service = s3Service;
+    this.googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
     // bind all methods
     this.login = this.login.bind(this);
@@ -36,6 +50,83 @@ export class AuthController extends BaseController {
     this.verifyAccount = this.verifyAccount.bind(this);
     this.forgotPassword = this.forgotPassword.bind(this);
     this.logout = this.logout.bind(this);
+    this.googleLogin = this.googleLogin.bind(this);
+  }
+
+  // The bucket is private — `avatar` is stored as an S3 key (except for
+  // Google-account avatars, which are already a full external URL), so it
+  // must be resolved before ever being sent to a client.
+  private async serializeUser(user: any) {
+    const plain = typeof user?.toObject === "function" ? user.toObject() : { ...user };
+    plain.avatar = await this.s3Service.resolveUrl(plain.avatar);
+    return plain;
+  }
+
+  private async generateUniqueUsername(base: string): Promise<string> {
+    const cleaned =
+      base
+        .toLowerCase()
+        .replace(/[^a-z0-9]/g, "")
+        .slice(0, USERNAME_LENGTH.MAX) || "user";
+
+    let candidate = cleaned;
+    let attempt = 0;
+    while (await this.userService.getOne({ username: candidate })) {
+      attempt++;
+      const suffix = String(attempt);
+      candidate = `${cleaned.slice(0, USERNAME_LENGTH.MAX - suffix.length)}${suffix}`;
+    }
+    return candidate;
+  }
+
+  async googleLogin(req: Request, res: Response) {
+    try {
+      const { idToken } = req.body;
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken,
+        audience: GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      if (!payload?.email) {
+        return this.sendBadRequestResponse(res, "Invalid Google token");
+      }
+
+      let user = await this.userService.getOne({ email: payload.email });
+      if (!user) {
+        const username = await this.generateUniqueUsername(
+          payload.email.split("@")[0]
+        );
+        user = await this.userService.create({
+          email: payload.email,
+          username,
+          fullName: payload.name || username,
+          avatar: payload.picture,
+          password: this.userService.generateRandomPassword(),
+          isVerified: true,
+        });
+      } else if (!user.isVerified) {
+        user = await this.userService.updateById(String(user._id), {
+          isVerified: true,
+        });
+      }
+
+      const { accessToken, refreshToken } =
+        await this.tokenService.generateAndSaveAuthTokens(
+          res,
+          String(user!._id)
+        );
+      return this.sendSuccessResponse<{
+        user: IUser;
+        accessToken: string;
+        refreshToken: string;
+      }>(
+        res,
+        { user: await this.serializeUser(user!), accessToken, refreshToken },
+        "Logged in successfully!"
+      );
+    } catch (e) {
+      return this.handleError(res, e, "googleLogin", "AuthController");
+    }
   }
 
   async login(req: Request, res: Response) {
@@ -69,7 +160,11 @@ export class AuthController extends BaseController {
         user: IUser;
         accessToken: string;
         refreshToken: string;
-      }>(res, { user, accessToken, refreshToken }, "Logged in successfully!");
+      }>(
+        res,
+        { user: await this.serializeUser(user), accessToken, refreshToken },
+        "Logged in successfully!"
+      );
     } catch (e) {
       return this.handleError(res, e, "login", "AuthController");
     }
@@ -96,7 +191,7 @@ export class AuthController extends BaseController {
 
       return this.sendSuccessResponse<IUser>(
         res,
-        user,
+        await this.serializeUser(user),
         existingUser ? EXISTING_SIGNUP(email) : NEW_SIGNUP(email)
       );
     } catch (e) {
@@ -141,7 +236,7 @@ export class AuthController extends BaseController {
       await session.commitTransaction();
       return this.sendSuccessResponse<IUser | null>(
         res,
-        verifiedUser,
+        verifiedUser && (await this.serializeUser(verifiedUser)),
         "Account verified successfully!"
       );
     } catch (e) {
@@ -156,14 +251,23 @@ export class AuthController extends BaseController {
     try {
       const user = req.user;
       let randomPassword = this.userService.generateRandomPassword();
-      // TODO : send random password on email
       let updatedUser = await this.userService.updateById(String(user._id), {
         password: randomPassword,
       });
 
+      this.emailService.sendMail(
+        user.email,
+        FORGOT_PASSWORD_EMAIL.SUBJECT,
+        FORGOT_PASSWORD_EMAIL.BODY(randomPassword, user.username)
+      );
+
+      // Invalidate any existing session — the old password (and any
+      // stolen refresh token) should stop working immediately.
+      await this.tokenService.revokeRefreshToken(String(user._id));
+
       return this.sendSuccessResponse<IUser | null>(
         res,
-        updatedUser,
+        updatedUser && (await this.serializeUser(updatedUser)),
         "New password sent on email successfully!"
       );
     } catch (e) {
@@ -172,6 +276,17 @@ export class AuthController extends BaseController {
   }
 
   async logout(req: Request, res: Response) {
+    const refreshToken = req.cookies[REFRESH_TOKEN_NAME];
+    if (refreshToken) {
+      try {
+        const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET_KEY) as {
+          id: string;
+        };
+        await this.tokenService.revokeRefreshToken(decoded.id);
+      } catch {
+        // Token already invalid/expired — nothing to revoke.
+      }
+    }
     this.tokenService.clearCookies(res);
     return this.sendSuccessResponse(res, null, "Logged out successfully!");
   }

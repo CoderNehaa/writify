@@ -1,0 +1,11 @@
+node_modules
+dist
+dist-test
+logs
+.env
+.git
+tests
+tools
+*.md
+jest.config.js
+tsconfig.jest.json

@@ -6,12 +6,15 @@ import express, {
   Router,
 } from "express";
 import mongoose from "mongoose";
-import { CORS_ORIGIN, DB_CONNECTION_URL } from "./config/environment";
-import cookieParser from "cookie-parser";
-import GlobalErrorHandler from "./middlewares/errorHandler.middleware";
-import logger from "./utils/logger";
 import cors from "cors";
-import multer from "multer";
+import cookieParser from "cookie-parser";
+import swaggerUi from "swagger-ui-express";
+
+import logger from "./utils/logger";
+import { CORS_ORIGIN, DB_CONNECTION_URL } from "./config/environment";
+import { connectRedis } from "./clients/redis.client";
+import { swaggerSpec } from "./config/swagger";
+import GlobalErrorHandler from "./middlewares/errorHandler.middleware";
 
 interface RouteDefinition {
   path: string;
@@ -28,6 +31,7 @@ class App {
 
     // Initialize DB connection, middlewares, routes and global error handler
     this.initializeDBConnection();
+    this.initializeRedisConnection();
     this.initializeMiddlewares();
     this.initializeRoutes(routes);
     this.initializeErrorHandling();
@@ -46,6 +50,12 @@ class App {
       });
   }
 
+  initializeRedisConnection() {
+    connectRedis().catch((error) => {
+      console.log("Failed to connect Redis:", error);
+    });
+  }
+
   initializeMiddlewares() {
     this.express.use(
       cors({
@@ -53,10 +63,10 @@ class App {
         credentials: true,
       })
     );
-    this.express.use(multer().any());
     this.express.use(express.json());
     this.express.use(cookieParser());
     this.express.use(express.urlencoded({ extended: true }));
+    this.express.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     // Middleware to log all requests
     this.express.use((req: Request, res: Response, next: NextFunction) => {
       res.on("finish", () => {

@@ -53,4 +53,10 @@ export class AuthValidator {
         .required(),
     }),
   };
+
+  static googleLoginValidator = {
+    body: joi.object({
+      idToken: joi.string().required(),
+    }),
+  };
 }

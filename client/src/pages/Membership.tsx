@@ -1,3 +1,5 @@
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
@@ -52,6 +54,16 @@ const plans = [
 ];
 
 const Membership = () => {
+  const navigate = useNavigate();
+
+  const handlePlanClick = (planName: string) => {
+    if (planName === "Free") {
+      navigate("/write");
+      return;
+    }
+    toast.info("This feature will be available soon!");
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -93,9 +105,10 @@ const Membership = () => {
                       </li>
                     ))}
                   </ul>
-                  <Button 
-                    className="w-full" 
+                  <Button
+                    className="w-full"
                     variant={plan.popular ? "hero" : "outline"}
+                    onClick={() => handlePlanClick(plan.name)}
                   >
                     {plan.name === "Free" ? "Get Started" : "Upgrade Now"}
                   </Button>

@@ -28,20 +28,20 @@ import NotFound from "./pages/NotFound";
 import Verify from "./pages/Verify";
 
 const App = () => {
-  const { setCurrentUser } = useAuthStore();
-  async function getCurrentUser() {
-    try {
-      const res = await getProfileService();
-      setCurrentUser(res.data);
-    } catch (e) {
-      console.log("Failed to fetch user!");
-    }
-  }
+  const { setCurrentUser, setIsInitializing } = useAuthStore();
 
   useEffect(() => {
-    if (!window.location.href.includes("auth")) {
-      getCurrentUser();
-    }
+    (async () => {
+      try {
+        const res = await getProfileService();
+        setCurrentUser(res.data);
+      } catch {
+        setCurrentUser(null);
+      } finally {
+        setIsInitializing(false);
+      }
+    })();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -78,6 +78,14 @@ const App = () => {
           />
           <Route
             path={ROUTES_PATH.ARTICLE.WRITE}
+            element={
+              <ProtectedRoute>
+                <WriteArticle />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/write/:id"
             element={
               <ProtectedRoute>
                 <WriteArticle />

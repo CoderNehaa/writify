@@ -35,7 +35,7 @@ export class CategoryController extends BaseController {
   getById = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const data = await this.categoryService.getById(id);
+      const data = await this.categoryService.getById(String(id));
       if (!data) {
         return this.sendNotFoundResponse(res);
       }
@@ -68,7 +68,7 @@ export class CategoryController extends BaseController {
   deleteById = async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
-      const data = await this.categoryService.deleteById(id);
+      const data = await this.categoryService.deleteById(String(id));
 
       return this.sendSuccessResponse(
         res,
