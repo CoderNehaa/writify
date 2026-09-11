@@ -6,13 +6,13 @@ export const Footer = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t bg-muted/30 mt-20">
-      <div className="container py-12">
+    <footer className="border-t bg-transparent mt-20">
+      <div className="container py-14">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <BookOpen className="h-6 w-6 text-primary" />
-              <span className="text-xl font-bold bg-gradient-hero bg-clip-text text-transparent">
+              <span className="font-serif text-2xl font-semibold tracking-tight bg-gradient-hero bg-clip-text text-transparent">
                 Writify
               </span>
             </Link>
@@ -22,13 +22,13 @@ export const Footer = () => {
           </div>
 
           <div>
-            <h3 className="font-semibold mb-4">Company</h3>
+            <h3 className="font-sans text-sm font-semibold mb-4">Company</h3>
             <ul className="space-y-2">
               {FOOTER_NAV.company.map((item) => (
                 <li key={item.href}>
                   <Link
                     to={item.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     {item.title}
                   </Link>
@@ -38,13 +38,13 @@ export const Footer = () => {
           </div>
 
           <div>
-            <h3 className="font-semibold mb-4">Legal</h3>
+            <h3 className="font-sans text-sm font-semibold mb-4">Legal</h3>
             <ul className="space-y-2">
               {FOOTER_NAV.legal.map((item) => (
                 <li key={item.href}>
                   <Link
                     to={item.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="text-sm text-muted-foreground hover:text-primary transition-colors"
                   >
                     {item.title}
                   </Link>

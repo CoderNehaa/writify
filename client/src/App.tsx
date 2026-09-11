@@ -28,9 +28,16 @@ import NotFound from "./pages/NotFound";
 import Verify from "./pages/Verify";
 
 const App = () => {
-  const { setCurrentUser, setIsInitializing } = useAuthStore();
+  const { currentUser, setCurrentUser, setIsInitializing } = useAuthStore();
 
   useEffect(() => {
+    // Nothing persisted from a prior session => anonymous visitor. Skip the
+    // /user/me call entirely instead of firing a guaranteed 401 on every
+    // public page load.
+    if (!currentUser) {
+      setIsInitializing(false);
+      return;
+    }
     (async () => {
       try {
         const res = await getProfileService();

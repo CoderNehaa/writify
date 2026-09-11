@@ -26,8 +26,14 @@ const useAuthStore = create<AuthStore>()(
         } catch {
           // Still clear the local session if the API call fails
         }
-        localStorage.clear();
-        sessionStorage.clear();
+        // Only drop this store's persisted slice — never blow away all of
+        // localStorage/sessionStorage (that also wipes e.g. the theme
+        // choice and any signup-in-progress state).
+        try {
+          sessionStorage.removeItem("auth-storage");
+        } catch {
+          // storage unavailable (private mode etc.) — nothing to clear
+        }
         set({ currentUser: null });
         window.location.href = "/";
       },

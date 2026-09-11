@@ -3,7 +3,10 @@ import { Router } from "express";
 import { BaseValidator } from "../base/base.validator";
 import { AuthValidator } from "./auth.validator";
 import { authController, authMiddleware } from "../container";
-import { authRateLimiter } from "../../middlewares/rateLimiter.middleware";
+import {
+  authRateLimiter,
+  usernameCheckRateLimiter,
+} from "../../middlewares/rateLimiter.middleware";
 
 const authRouter = Router();
 const { validateEndpoint } = BaseValidator;
@@ -188,6 +191,7 @@ authRouter.post("/logout", validateEndpoint(), authController.logout);
  */
 authRouter.post(
   "/check-username",
+  usernameCheckRateLimiter,
   validateEndpoint(checkUsernameValidator),
   authController.checkUsername
 );

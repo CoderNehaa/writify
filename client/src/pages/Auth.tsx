@@ -16,11 +16,11 @@ const Auth = () => {
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
             <div className="flex justify-center mb-4">
-              <div className="w-12 h-12 rounded-lg bg-gradient-hero flex items-center justify-center">
+              <div className="w-12 h-12 rounded-xl bg-gradient-hero flex items-center justify-center">
                 <BookOpen className="h-6 w-6 text-primary-foreground" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold mb-2">Welcome to Writify</h1>
+            <h1 className="text-3xl font-semibold mb-2">Welcome to Writify</h1>
             <p className="text-muted-foreground">
               Join our community of writers and readers
             </p>

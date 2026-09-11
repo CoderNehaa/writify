@@ -25,35 +25,46 @@ class App {
   express: Application;
   port: number;
 
+  private routes: RouteDefinition[];
+
   constructor(port: number, routes: RouteDefinition[]) {
     this.express = express();
     this.port = port;
+    this.routes = routes;
+  }
 
-    // Initialize DB connection, middlewares, routes and global error handler
-    this.initializeDBConnection();
-    this.initializeRedisConnection();
+  // Connect infra first, then wire the app and start listening — so the
+  // server never accepts a request before Mongo/Redis are ready.
+  async start() {
+    await this.initializeDBConnection();
+    await this.initializeRedisConnection();
     this.initializeMiddlewares();
-    this.initializeRoutes(routes);
+    this.initializeRoutes(this.routes);
     this.initializeErrorHandling();
+    this.listen();
   }
 
-  initializeDBConnection() {
-    mongoose
-      .connect(DB_CONNECTION_URL)
-      .then((mongooseInstance) => {
-        console.log("DB Connected successfully!");
-        return mongooseInstance;
-      })
-      .catch((error) => {
-        console.log("Failed to connect DB:", error);
-        throw error;
-      });
+  async initializeDBConnection() {
+    try {
+      await mongoose.connect(DB_CONNECTION_URL);
+      logger.info("DB Connected successfully!");
+    } catch (error) {
+      logger.error("Failed to connect DB:", error);
+      throw error; // fatal — handled by index.ts
+    }
   }
 
-  initializeRedisConnection() {
-    connectRedis().catch((error) => {
-      console.log("Failed to connect Redis:", error);
-    });
+  async initializeRedisConnection() {
+    try {
+      await connectRedis();
+    } catch (error) {
+      // Non-fatal: auth still works without the revocation store, and
+      // node-redis keeps retrying in the background.
+      logger.error(
+        "Redis connection failed at startup, continuing without it:",
+        error
+      );
+    }
   }
 
   initializeMiddlewares() {
@@ -66,6 +77,17 @@ class App {
     this.express.use(express.json());
     this.express.use(cookieParser());
     this.express.use(express.urlencoded({ extended: true }));
+
+    // Registered before the request-logging middleware below so a load
+    // balancer / uptime monitor polling this every few seconds doesn't
+    // spam the logs.
+    this.express.get("/api/health", (_req: Request, res: Response) => {
+      res.status(200).json({
+        status: "ok",
+        dbConnected: mongoose.connection.readyState === 1,
+      });
+    });
+
     this.express.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
     // Middleware to log all requests
     this.express.use((req: Request, res: Response, next: NextFunction) => {

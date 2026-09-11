@@ -4,6 +4,7 @@ import { UserService } from "./user.service";
 import { S3Service } from "../../clients/s3.service";
 import { TokenService } from "../../clients/token.service";
 import { ArticleService } from "../article/article.service";
+import { toSafeUser } from "../../utils/user-serializer";
 
 export class UserController extends BaseController {
   private userService: UserService;
@@ -24,14 +25,9 @@ export class UserController extends BaseController {
     this.articleService = articleService;
   }
 
-  // The bucket is private — `avatar` is stored as an S3 key, not a public
-  // URL, so it must be resolved to a fresh presigned URL before ever being
-  // sent to a client.
-  private async serializeUser(user: any) {
-    const plain = typeof user?.toObject === "function" ? user.toObject() : { ...user };
-    plain.avatar = await this.s3Service.resolveUrl(plain.avatar);
-    return plain;
-  }
+  // Single source of truth in utils/user-serializer — strips password/__v
+  // and resolves the private-bucket avatar key.
+  private serializeUser = (user: any) => toSafeUser(user, this.s3Service);
 
   getLoggedInUser = async (req: Request, res: Response) => {
     return this.sendSuccessResponse(res, await this.serializeUser(req.user));
@@ -107,7 +103,7 @@ export class UserController extends BaseController {
 
       return this.sendSuccessResponse(
         res,
-        deletedUser,
+        deletedUser && (await this.serializeUser(deletedUser)),
         deleteArticles
           ? "Account and all articles deleted successfully!"
           : "Account deleted successfully!"
@@ -137,7 +133,7 @@ export class UserController extends BaseController {
 
       return this.sendSuccessResponse(
         res,
-        updatedUser,
+        updatedUser && (await this.serializeUser(updatedUser)),
         "Password updated successfully!"
       );
     } catch (e) {

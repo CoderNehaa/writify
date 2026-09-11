@@ -58,7 +58,7 @@ const Profile = () => {
       <main className="flex-1 py-8">
         <div className="container">
           <div className="max-w-4xl mx-auto">
-            <div className="bg-gradient-card rounded-lg p-8 shadow-card mb-8">
+            <div className="bg-card border rounded-2xl p-8 mb-8">
               <div className="flex flex-col md:flex-row gap-6 items-start md:items-center">
                 {user.avatar ? (
                   <Avatar className="h-24 w-24">
@@ -74,13 +74,13 @@ const Profile = () => {
                 )}
 
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold mb-1">{user.fullName}</h1>
-                  <p className="text-muted-foreground mb-2">@{user.username}</p>
-                  <p className="text-foreground mb-4">{user.bio}</p>
+                  <h1 className="text-3xl font-semibold mb-1">{user.fullName}</h1>
+                  <p className="text-primary mb-2">@{user.username}</p>
+                  <p className="text-muted-foreground mb-4">{user.bio}</p>
 
                   <div className="flex gap-6 text-sm">
                     <div>
-                      <span className="font-semibold">{articles.length}</span>{" "}
+                      <span className="font-serif text-lg font-semibold">{articles.length}</span>{" "}
                       <span className="text-muted-foreground">Articles</span>
                     </div>
                   </div>
@@ -97,8 +97,8 @@ const Profile = () => {
             </div>
 
             <div>
-              <h2 className="flex items-center gap-2 text-lg font-semibold mb-6">
-                <FileText className="h-4 w-4" />
+              <h2 className="flex items-center gap-2 font-sans text-lg font-semibold mb-6">
+                <FileText className="h-4 w-4 text-primary" />
                 Articles
               </h2>
               {articles.length === 0 ? (

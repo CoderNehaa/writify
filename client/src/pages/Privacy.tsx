@@ -8,9 +8,9 @@ const Privacy = () => {
       
       <main className="flex-1 py-12">
         <div className="container max-w-4xl">
-          <h1 className="text-4xl font-bold mb-8">Privacy Policy</h1>
+          <h1 className="text-4xl font-semibold mb-8">Privacy Policy</h1>
           
-          <div className="prose prose-lg max-w-none space-y-6">
+          <div className="prose prose-lg dark:prose-invert max-w-none space-y-6">
             <p className="text-muted-foreground">
               Last updated: {new Date().toLocaleDateString()}
             </p>

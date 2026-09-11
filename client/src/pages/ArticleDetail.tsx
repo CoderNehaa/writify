@@ -89,13 +89,13 @@ const ArticleDetail = () => {
               )}
             </div>
 
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">{article.title}</h1>
+            <h1 className="text-4xl md:text-5xl font-semibold mb-6">{article.title}</h1>
 
             {article.coverImage && (
               <img
                 src={article.coverImage}
                 alt={article.title}
-                className="w-full rounded-lg mb-6 object-cover max-h-[420px]"
+                className="w-full rounded-2xl border mb-6 object-cover max-h-[420px]"
               />
             )}
 
@@ -119,7 +119,7 @@ const ArticleDetail = () => {
           </div>
 
           <div
-            className="article-content prose prose-lg max-w-none mt-8 mb-12"
+            className="article-content prose prose-lg dark:prose-invert max-w-none mt-8 mb-12"
             dangerouslySetInnerHTML={{ __html: article.content }}
           />
         </article>

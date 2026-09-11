@@ -2,89 +2,93 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here.
 All colors MUST be HSL.
+
+Palette adapted from the "writify-dark" mockup: a warm off-white light theme and a
+warm near-black dark theme, both built around a gold accent. Light lives on :root,
+dark on .dark (toggled by use-theme + the pre-paint script in index.html).
 */
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 0 0% 9%;
+    --background: 40 27% 96%;
+    --foreground: 220 11% 11%;
 
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 9%;
+    --card-foreground: 220 11% 11%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 9%;
+    --popover-foreground: 220 11% 11%;
 
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 100%;
-    --primary-hover: 0 0% 22%;
+    --primary: 38 72% 31%;
+    --primary-foreground: 42 100% 98%;
+    --primary-hover: 37 75% 25%;
 
-    --secondary: 0 0% 96%;
-    --secondary-foreground: 0 0% 9%;
+    --secondary: 40 27% 94%;
+    --secondary-foreground: 220 11% 11%;
 
-    --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 45%;
+    --muted: 40 27% 94%;
+    --muted-foreground: 224 11% 40%;
 
-    --accent: 0 0% 30%;
-    --accent-foreground: 0 0% 100%;
-    --accent-hover: 0 0% 20%;
+    --accent: 38 72% 31%;
+    --accent-foreground: 42 100% 98%;
+    --accent-hover: 37 75% 25%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 5 61% 47%;
+    --destructive-foreground: 6 100% 98%;
 
-    --border: 0 0% 90%;
-    --input: 0 0% 90%;
-    --ring: 0 0% 9%;
+    --border: 38 22% 85%;
+    --input: 38 22% 85%;
+    --ring: 38 72% 31%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 12%), hsl(0 0% 32%));
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(0 0% 98%));
+    --gradient-hero: linear-gradient(135deg, hsl(38 72% 31%), hsl(37 75% 25%));
+    --gradient-card: linear-gradient(180deg, hsl(0 0% 100%), hsl(40 27% 98%));
 
-    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.08);
-    --shadow-hover: 0 8px 24px -4px hsl(0 0% 0% / 0.12);
+    --shadow-card: 0 1px 2px hsl(20 14% 10% / 0.05), 0 14px 30px -22px hsl(20 14% 10% / 0.35);
+    --shadow-hover: 0 2px 4px hsl(20 14% 10% / 0.06), 0 22px 44px -24px hsl(20 14% 10% / 0.4);
 
     --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   .dark {
-    --background: 0 0% 9%;
-    --foreground: 0 0% 98%;
+    --background: 220 29% 6%;
+    --foreground: 216 38% 95%;
 
-    --card: 0 0% 14%;
-    --card-foreground: 0 0% 98%;
+    --card: 221 32% 10%;
+    --card-foreground: 216 38% 95%;
 
-    --popover: 0 0% 14%;
-    --popover-foreground: 0 0% 98%;
+    --popover: 221 32% 10%;
+    --popover-foreground: 216 38% 95%;
 
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --primary-hover: 0 0% 85%;
+    --primary: 34 68% 69%;
+    --primary-foreground: 40 48% 6%;
+    --primary-hover: 35 79% 75%;
 
-    --secondary: 0 0% 20%;
-    --secondary-foreground: 0 0% 98%;
+    --secondary: 221 30% 12%;
+    --secondary-foreground: 216 38% 95%;
 
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 65%;
+    --muted: 221 30% 12%;
+    --muted-foreground: 219 16% 67%;
 
-    --accent: 0 0% 75%;
-    --accent-foreground: 0 0% 9%;
-    --accent-hover: 0 0% 85%;
+    --accent: 34 68% 69%;
+    --accent-foreground: 40 48% 6%;
+    --accent-hover: 35 79% 75%;
 
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 81% 69%;
+    --destructive-foreground: 0 41% 7%;
 
-    --border: 0 0% 24%;
-    --input: 0 0% 24%;
-    --ring: 0 0% 98%;
+    --border: 220 24% 17%;
+    --input: 220 24% 17%;
+    --ring: 34 68% 69%;
 
-    --gradient-hero: linear-gradient(135deg, hsl(0 0% 30%), hsl(0 0% 55%));
-    --gradient-card: linear-gradient(180deg, hsl(0 0% 14%), hsl(0 0% 17%));
+    --gradient-hero: linear-gradient(135deg, hsl(34 68% 69%), hsl(35 79% 75%));
+    --gradient-card: linear-gradient(180deg, hsl(221 32% 10%), hsl(221 30% 12%));
 
-    --shadow-card: 0 2px 8px -2px hsl(0 0% 0% / 0.3);
-    --shadow-hover: 0 8px 24px -4px hsl(0 0% 0% / 0.4);
+    --shadow-card: none;
+    --shadow-hover: none;
   }
 }
 
@@ -97,21 +101,59 @@ All colors MUST be HSL.
     @apply bg-background text-foreground font-sans antialiased;
   }
 
+  /* Serif display type, matching the mockup's Newsreader headings. shadcn's
+     CardTitle renders an <h3>, so this covers card titles too. */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-serif;
+    letter-spacing: -0.015em;
+  }
+
   /* Readable article typography */
   .article-content {
-    @apply text-lg leading-relaxed;
+    @apply text-lg leading-relaxed font-serif;
+    color: hsl(var(--foreground));
   }
 
   .article-content h1 {
-    @apply text-4xl font-bold mb-4 mt-8;
+    @apply text-4xl font-semibold mb-4 mt-8;
   }
 
   .article-content h2 {
-    @apply text-3xl font-bold mb-3 mt-6;
+    @apply text-3xl font-semibold mb-3 mt-6;
   }
 
   .article-content p {
-    @apply mb-4;
+    @apply mb-6;
+  }
+
+  .article-content ul,
+  .article-content ol {
+    @apply mb-6 pl-6;
+  }
+
+  .article-content ul {
+    @apply list-disc;
+  }
+
+  .article-content ol {
+    @apply list-decimal;
+  }
+
+  .article-content li {
+    @apply mb-3;
+  }
+
+  .article-content li::marker {
+    color: hsl(var(--primary));
+  }
+
+  .article-content blockquote {
+    @apply mb-6 pl-5 italic;
+    border-left: 2px solid hsl(var(--primary));
+    color: hsl(var(--muted-foreground));
   }
 
   /* Smooth animations */
@@ -149,7 +191,78 @@ All colors MUST be HSL.
   }
 
   .hover-lift:hover {
-    transform: translateY(-4px);
+    transform: translateY(-3px);
     box-shadow: var(--shadow-hover);
   }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hover-lift:hover {
+      transform: none;
+    }
+  }
+}
+
+@layer components {
+  /* Presentational-only gradient placeholder for articles with no cover image,
+     mirroring the mockup's category thumbnails. Picked deterministically from
+     the category name by categoryGradientClass() in utils/article.ts — carries
+     no data. */
+  .cat-thumb {
+    background: linear-gradient(140deg, #26313f, #3c4a5e 60%, #1e2733);
+  }
+  .cat-thumb-0 {
+    background: linear-gradient(140deg, #1b3a5c, #3e5f86 60%, #243a54);
+  }
+  .cat-thumb-1 {
+    background: linear-gradient(140deg, #3a2e20, #6b4f30 60%, #2c2419);
+  }
+  .cat-thumb-2 {
+    background: linear-gradient(140deg, #4a2a22, #8a5236 60%, #33201a);
+  }
+  .cat-thumb-3 {
+    background: linear-gradient(140deg, #26313f, #3c4a5e 60%, #1e2733);
+  }
+  .cat-thumb-4 {
+    background: linear-gradient(140deg, #2c4a3a, #4a7358 60%, #22332a);
+  }
+  .cat-thumb-5 {
+    background: linear-gradient(140deg, #3a2c4a, #5c4a73 60%, #2a2233);
+  }
+  :root:not(.dark) .cat-thumb-0 {
+    background: linear-gradient(140deg, #d3e3f1, #a9c6e0 60%, #e1ecf5);
+  }
+  :root:not(.dark) .cat-thumb-1 {
+    background: linear-gradient(140deg, #ede0cc, #d8bc93 60%, #f2e8d8);
+  }
+  :root:not(.dark) .cat-thumb-2 {
+    background: linear-gradient(140deg, #f0d9ce, #dfa88a 60%, #f6e7de);
+  }
+  :root:not(.dark) .cat-thumb-3,
+  :root:not(.dark) .cat-thumb {
+    background: linear-gradient(140deg, #dfe4ea, #bfc8d4 60%, #ebeef2);
+  }
+  :root:not(.dark) .cat-thumb-4 {
+    background: linear-gradient(140deg, #d5e8dc, #aecdba 60%, #e4f0e9);
+  }
+  :root:not(.dark) .cat-thumb-5 {
+    background: linear-gradient(140deg, #e4dcec, #c6b6d9 60%, #efe8f5);
+  }
+}
+
+/* react-toastify: pull the toast surface onto our tokens so it reads in both
+   themes without pinning a theme prop at the app root. */
+.Toastify__toast {
+  background: hsl(var(--card)) !important;
+  color: hsl(var(--foreground)) !important;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius);
+}
+.Toastify__toast-body {
+  color: hsl(var(--foreground));
+}
+.Toastify__close-button {
+  color: hsl(var(--muted-foreground));
+}
+.Toastify__progress-bar {
+  background: hsl(var(--primary));
 }

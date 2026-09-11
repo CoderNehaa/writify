@@ -14,7 +14,7 @@ const About = () => {
       <main className="flex-1">
         <section className="py-20 bg-gradient-to-br from-primary/5 via-transparent to-accent/5">
           <div className="container max-w-4xl text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-4xl md:text-5xl font-semibold mb-6">
               About Writify
             </h1>
             <p className="text-xl text-muted-foreground">
@@ -25,8 +25,8 @@ const About = () => {
 
         <section className="py-20">
           <div className="container max-w-4xl">
-            <div className="prose prose-lg max-w-none">
-              <h2 className="text-3xl font-bold mb-6">Our Mission</h2>
+            <div className="prose prose-lg dark:prose-invert max-w-none">
+              <h2 className="text-3xl font-semibold mb-6">Our Mission</h2>
               <p className="text-lg text-muted-foreground mb-6">
                 Writify was created with a simple yet powerful vision: to provide a platform where 
                 writers can freely express their ideas, build meaningful connections with readers, and 
@@ -40,7 +40,7 @@ const About = () => {
               </p>
 
               <div className="grid md:grid-cols-2 gap-8 my-12">
-                <div className="bg-gradient-card p-6 rounded-lg shadow-card">
+                <div className="bg-card border p-6 rounded-2xl">
                   <BookOpen className="h-12 w-12 text-primary mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Quality Content</h3>
                   <p className="text-muted-foreground">
@@ -48,7 +48,7 @@ const About = () => {
                   </p>
                 </div>
 
-                <div className="bg-gradient-card p-6 rounded-lg shadow-card">
+                <div className="bg-card border p-6 rounded-2xl">
                   <Users className="h-12 w-12 text-primary mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Thriving Community</h3>
                   <p className="text-muted-foreground">
@@ -56,7 +56,7 @@ const About = () => {
                   </p>
                 </div>
 
-                <div className="bg-gradient-card p-6 rounded-lg shadow-card">
+                <div className="bg-card border p-6 rounded-2xl">
                   <TrendingUp className="h-12 w-12 text-primary mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Fair Monetization</h3>
                   <p className="text-muted-foreground">
@@ -64,7 +64,7 @@ const About = () => {
                   </p>
                 </div>
 
-                <div className="bg-gradient-card p-6 rounded-lg shadow-card">
+                <div className="bg-card border p-6 rounded-2xl">
                   <Heart className="h-12 w-12 text-primary mb-4" />
                   <h3 className="text-xl font-semibold mb-2">Writer-First</h3>
                   <p className="text-muted-foreground">
@@ -73,7 +73,7 @@ const About = () => {
                 </div>
               </div>
 
-              <h2 className="text-3xl font-bold mb-6">Join Our Community</h2>
+              <h2 className="text-3xl font-semibold mb-6">Join Our Community</h2>
               <p className="text-lg text-muted-foreground mb-6">
                 Whether you're a seasoned writer or just starting out, Writify provides the tools 
                 and community support you need to succeed. Join thousands of writers who have already 

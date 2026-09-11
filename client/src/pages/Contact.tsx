@@ -54,7 +54,7 @@ const Contact = () => {
       <main className="flex-1 py-12">
         <div className="container max-w-5xl">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Get in Touch</h1>
+            <h1 className="text-4xl md:text-5xl font-semibold mb-4">Get in Touch</h1>
             <p className="text-lg text-muted-foreground">
               Have questions? We'd love to hear from you.
             </p>
@@ -174,7 +174,7 @@ const Contact = () => {
           </div>
 
           <div id="faq" className="max-w-3xl mx-auto mt-24 pt-12 border-t scroll-mt-20">
-            <h2 className="text-2xl font-bold mb-6 text-center">
+            <h2 className="text-2xl font-semibold mb-6 text-center">
               Frequently Asked Questions
             </h2>
             <Accordion type="single" collapsible>

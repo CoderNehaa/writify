@@ -8,7 +8,16 @@
     <meta name="author" content="Writify" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+      // Apply the persisted theme before first paint so returning users who
+      // picked dark don't see a light flash. Default is light.
+      try {
+        if (localStorage.getItem("writify-theme") === "dark") {
+          document.documentElement.classList.add("dark");
+        }
+      } catch (e) {}
+    </script>
 
     <meta property="og:title" content="Writify - Share Ideas, Earn from Your Passion" />
     <meta property="og:description" content="Join Writify to share your writing, connect with readers, and monetize your content." />

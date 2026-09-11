@@ -10,7 +10,9 @@ const { validateEndpoint, paramsIdValidator } = BaseValidator;
 const { newArticleValidator, updateArticleValidator, listArticlesValidator } =
   ArticleValidator;
 
-articleRouter.use(authMiddleware.authentic);
+// NOTE: auth is applied per-route below — the two GETs are public
+// (published articles are readable by anyone; drafts stay author-only),
+// while create/update/delete require a logged-in user.
 
 /**
  * @openapi
@@ -36,6 +38,7 @@ articleRouter.use(authMiddleware.authentic);
  */
 articleRouter.post(
   "/new",
+  authMiddleware.authentic,
   uploadImage.any(),
   validateEndpoint(newArticleValidator),
   articleController.create
@@ -59,6 +62,7 @@ articleRouter.post(
  */
 articleRouter.get(
   "/all",
+  authMiddleware.optionalAuth,
   validateEndpoint(listArticlesValidator),
   articleController.getAll
 );
@@ -80,6 +84,7 @@ articleRouter.get(
  */
 articleRouter.get(
   "/data/:id",
+  authMiddleware.optionalAuth,
   validateEndpoint(paramsIdValidator),
   articleController.getById
 );
@@ -123,12 +128,14 @@ articleRouter.get(
  */
 articleRouter.put(
   "/:id",
+  authMiddleware.authentic,
   uploadImage.any(),
   validateEndpoint(updateArticleValidator),
   articleController.updateById
 );
 articleRouter.delete(
   "/:id",
+  authMiddleware.authentic,
   validateEndpoint(paramsIdValidator),
   articleController.deleteById
 );

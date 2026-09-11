@@ -153,7 +153,7 @@ const WriteArticle = () => {
   }
 
   return (
-    <div className="min-h-screen flex flex-col bg-muted/30">
+    <div className="min-h-screen flex flex-col">
       <Header />
 
       <main className="flex-1 py-8">
@@ -303,7 +303,7 @@ const WriteArticle = () => {
             />
           )}
           <div
-            className="prose prose-lg max-w-none"
+            className="prose prose-lg dark:prose-invert max-w-none"
             dangerouslySetInnerHTML={{
               __html: content || "<p>Nothing to preview yet.</p>",
             }}

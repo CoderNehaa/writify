@@ -12,9 +12,10 @@ export const ACCESS_TOKEN_SECRET_KEY =
 export const REFRESH_TOKEN_SECRET_KEY =
   process.env.REFRESH_TOKEN_SECRET_KEY || "";
 
+// Verified SES sender identity (address must be verified in the SES console;
+// while the account is in the SES sandbox, recipients must be verified too).
 export const EMAIL_SENDER_MAIL = process.env.EMAIL_SENDER_MAIL || "";
 export const EMAIL_SENDER_NAME = process.env.EMAIL_SENDER_NAME || "";
-export const EMAIL_SENDER_PASSWORD = process.env.EMAIL_SENDER_PASSWORD;
 
 // CORS Origin
 const CORS_ORIGIN_ENV = process.env.CORS_ORIGIN;

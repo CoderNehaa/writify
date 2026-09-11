@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User } from "lucide-react";
-import { stripHtml, formatArticleDate } from "@/utils/article";
+import { stripHtml, formatArticleDate, categoryGradientClass } from "@/utils/article";
 
 interface ArticleListItemProps {
   article: IArticle;
@@ -10,8 +10,8 @@ interface ArticleListItemProps {
 
 export const ArticleListItem = ({ article }: ArticleListItemProps) => {
   return (
-    <div className="hover-lift p-4 rounded-lg border bg-card transition-all duration-300">
-      <div className="flex gap-4">
+    <div className="rounded-2xl border bg-card p-5 sm:p-6 transition-colors hover:bg-secondary hover:border-foreground/15">
+      <div className="flex gap-4 sm:gap-6">
         {/* min-w-0 is required here — without it, a flex child sizes to
             its content's natural width before line-clamp gets a chance to
             wrap it, so the "2 lines" below was rendering as one long line
@@ -22,7 +22,7 @@ export const ArticleListItem = ({ article }: ArticleListItemProps) => {
           </div>
 
           <Link to={`/articles/${article._id}`}>
-            <h3 className="text-lg font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors">
+            <h3 className="text-xl font-semibold mb-2 line-clamp-2 hover:text-primary transition-colors">
               {article.title}
             </h3>
           </Link>
@@ -52,17 +52,26 @@ export const ArticleListItem = ({ article }: ArticleListItemProps) => {
           </div>
         </div>
 
-        {article.coverImage && (
-          <Link to={`/articles/${article._id}`} className="flex-shrink-0">
-            <div className="w-40 h-32 overflow-hidden rounded-lg">
+        <Link
+          to={`/articles/${article._id}`}
+          className="hidden sm:block flex-shrink-0"
+        >
+          <div className="w-52 h-32 overflow-hidden rounded-xl border">
+            {article.coverImage ? (
               <img
                 src={article.coverImage}
                 alt={article.title}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
               />
-            </div>
-          </Link>
-        )}
+            ) : (
+              <div
+                className={`w-full h-full ${categoryGradientClass(
+                  article.category?.categoryName
+                )}`}
+              />
+            )}
+          </div>
+        </Link>
       </div>
     </div>
   );

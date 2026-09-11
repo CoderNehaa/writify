@@ -71,17 +71,21 @@ const Membership = () => {
       <main className="flex-1 py-12">
         <div className="container">
           <div className="mb-12 text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Choose Your Plan</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-semibold mb-4">Choose Your Plan</h1>
+            <p className="text-lg text-muted-foreground font-serif max-w-2xl mx-auto">
               Unlock the full potential of Writify with our membership plans
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto items-start">
             {plans.map((plan) => (
-              <Card 
-                key={plan.name} 
-                className={`relative hover-lift ${plan.popular ? 'border-primary shadow-elegant' : ''}`}
+              <Card
+                key={plan.name}
+                className={`relative ${
+                  plan.popular
+                    ? "border-primary bg-primary/[0.04] shadow-hover"
+                    : ""
+                }`}
               >
                 {plan.popular && (
                   <Badge className="absolute -top-3 left-1/2 -translate-x-1/2" variant="default">
@@ -92,15 +96,15 @@ const Membership = () => {
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
                   <CardDescription>{plan.description}</CardDescription>
                   <div className="mt-4">
-                    <span className="text-4xl font-bold">{plan.price}</span>
+                    <span className="font-serif text-4xl font-semibold">{plan.price}</span>
                     <span className="text-muted-foreground ml-2">/ {plan.period}</span>
                   </div>
                 </CardHeader>
                 <CardContent>
                   <ul className="space-y-3 mb-6">
                     {plan.features.map((feature) => (
-                      <li key={feature} className="flex items-start gap-2">
-                        <Check className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                      <li key={feature} className="flex items-start gap-2 text-sm">
+                        <Check className="h-4 w-4 text-primary flex-shrink-0 mt-0.5" />
                         <span>{feature}</span>
                       </li>
                     ))}

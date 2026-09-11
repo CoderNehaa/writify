@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Pencil, Trash2, User } from "lucide-react";
-import { stripHtml, formatArticleDate } from "@/utils/article";
+import { stripHtml, formatArticleDate, categoryGradientClass } from "@/utils/article";
 
 interface ArticleCardProps {
   article: IArticle;
@@ -14,16 +14,22 @@ interface ArticleCardProps {
 
 export const ArticleCard = ({ article, editHref, onDelete }: ArticleCardProps) => {
   return (
-    <Card className="hover-lift shadow-card border-0 bg-gradient-card overflow-hidden group">
-      {article.coverImage && (
-        <div className="aspect-video overflow-hidden">
+    <Card className="border bg-card overflow-hidden group transition-colors hover:border-foreground/15">
+      <div className="aspect-video overflow-hidden">
+        {article.coverImage ? (
           <img
             src={article.coverImage}
             alt={article.title}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
-        </div>
-      )}
+        ) : (
+          <div
+            className={`w-full h-full ${categoryGradientClass(
+              article.category?.categoryName
+            )}`}
+          />
+        )}
+      </div>
 
       <CardContent className="p-6">
         <div className="flex items-center gap-2 mb-3">

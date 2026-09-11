@@ -106,7 +106,7 @@ const Settings = () => {
 
       <main className="flex-1 py-8">
         <div className="container max-w-4xl">
-          <h1 className="text-4xl font-bold mb-8">Settings</h1>
+          <h1 className="text-4xl font-semibold mb-8">Settings</h1>
 
           <div className="space-y-6">
             {/* Update Account Section */}
@@ -154,20 +154,20 @@ const Settings = () => {
                         {/* Pencil Icon */}
                         <button
                           type="button"
-                          className="absolute bottom-0 right-0 bg-white bg-opacity-90 p-1 rounded-full shadow"
+                          className="absolute bottom-0 right-0 bg-secondary border border-border text-foreground p-1.5 rounded-full shadow-sm hover:border-foreground/30"
                           onClick={() => fileInputRef?.click()}
                         >
-                          <Pencil size={16} />
+                          <Pencil size={14} />
                         </button>
 
                         {/* Cross Icon */}
                         {previewImage && (
                           <button
                             type="button"
-                            className="absolute top-0 right-0 bg-white bg-opacity-90 p-1 rounded-full shadow"
+                            className="absolute top-0 right-0 bg-secondary border border-border text-foreground p-1.5 rounded-full shadow-sm hover:border-foreground/30"
                             onClick={handleRemoveImage}
                           >
-                            <X size={16} />
+                            <X size={14} />
                           </button>
                         )}
 
@@ -233,9 +233,9 @@ const Settings = () => {
             <Separator />
 
             {/* Delete Account Section */}
-            <Card className="border-destructive">
+            <Card className="border-destructive/40 bg-destructive/5">
               <CardHeader>
-                <CardTitle className="text-destructive">Danger Zone</CardTitle>
+                <CardTitle className="font-sans text-xl text-destructive">Danger Zone</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center justify-between">

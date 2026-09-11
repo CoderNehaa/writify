@@ -13,6 +13,7 @@ export class AuthMiddleware {
     this.tokenService = tokenService;
     // bind methods
     this.authentic = this.authentic.bind(this);
+    this.optionalAuth = this.optionalAuth.bind(this);
     this.isAdmin = this.isAdmin.bind(this);
     this.userExistWithEmail = this.userExistWithEmail.bind(this);
   }
@@ -60,6 +61,36 @@ export class AuthMiddleware {
 
     req.user = user;
     next();
+  }
+
+  // For routes that are public but return more when you're logged in
+  // (e.g. an author seeing their own drafts in a list). Populates req.user
+  // when a valid session exists; otherwise just continues as anonymous.
+  async optionalAuth(req: Request, res: Response, next: NextFunction) {
+    try {
+      const accessToken = req.cookies[ACCESS_TOKEN_NAME];
+      const refreshToken = req.cookies[REFRESH_TOKEN_NAME];
+      if (!accessToken && !refreshToken) return next();
+
+      const data = await this.tokenService.validateToken(
+        accessToken,
+        refreshToken,
+        res
+      );
+      if (data?.decoded?.id) {
+        const user = await this.userService.getById(data.decoded.id);
+        if (
+          user &&
+          user.isVerified &&
+          Object.values(EUserRoles).includes(user.role)
+        ) {
+          req.user = user;
+        }
+      }
+    } catch {
+      // ignore — fall through as an anonymous request
+    }
+    return next();
   }
 
   isAdmin(req: Request, res: Response, next: NextFunction) {

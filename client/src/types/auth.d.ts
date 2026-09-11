@@ -3,7 +3,6 @@ interface ISignUpPayload {
   username: string;
   email: string;
   password: string;
-  providerType?: string;
 }
 
 interface ISignInPayload {
@@ -18,6 +17,4 @@ interface IVerifyPayload {
 
 interface ILoginResponseData {
   user: IUser;
-  accessToken: string;
-  refreshToken: string;
 }

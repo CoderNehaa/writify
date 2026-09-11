@@ -6,6 +6,7 @@ import {
   REFRESH_TOKEN_SECRET_KEY,
 } from "../config/environment";
 import {
+  ACCESS_TOKEN_EXPIRY_SECONDS,
   ACCESS_TOKEN_EXPIRY_TIME,
   ACCESS_TOKEN_NAME,
   REFRESH_TOKEN_EXPIRY_SECONDS,
@@ -13,35 +14,59 @@ import {
   REFRESH_TOKEN_NAME,
 } from "../constants/auth";
 import { redisClient } from "./redis.client";
+import logger from "../utils/logger";
 
 const refreshTokenRedisKey = (userId: string) => `refresh_token:${userId}`;
 
-const cookieOptions = (): CookieOptions => ({
+const isProd = NODE_ENV === "production";
+
+// In production the SPA (e.g. CloudFront) and the API are different sites,
+// so the auth cookies must be `SameSite=None; Secure` or the browser won't
+// send them on cross-site XHR. Locally, `lax` over http keeps dev simple.
+const cookieOptions = (maxAgeMs?: number): CookieOptions => ({
   httpOnly: true,
-  sameSite: "lax",
+  sameSite: isProd ? "none" : "lax",
+  secure: isProd,
   path: "/",
-  secure: NODE_ENV === "production",
+  ...(maxAgeMs ? { maxAge: maxAgeMs } : {}),
 });
 
 export class TokenService {
   generateAndSaveAuthTokens = async (res: Response, userId: string) => {
-    // Create access and refresh token
     const accessToken = jwt.sign({ id: userId }, ACCESS_TOKEN_SECRET_KEY, {
       expiresIn: ACCESS_TOKEN_EXPIRY_TIME,
     });
     const refreshToken = jwt.sign({ id: userId }, REFRESH_TOKEN_SECRET_KEY, {
       expiresIn: REFRESH_TOKEN_EXPIRY_TIME,
     });
-    // Save access and refresh token in cookies
-    res.cookie(ACCESS_TOKEN_NAME, accessToken, cookieOptions());
-    res.cookie(REFRESH_TOKEN_NAME, refreshToken, cookieOptions());
+
+    // Persisted cookies (not session cookies) so a browser restart keeps
+    // the user signed in for the refresh token's lifetime.
+    res.cookie(
+      ACCESS_TOKEN_NAME,
+      accessToken,
+      cookieOptions(ACCESS_TOKEN_EXPIRY_SECONDS * 1000)
+    );
+    res.cookie(
+      REFRESH_TOKEN_NAME,
+      refreshToken,
+      cookieOptions(REFRESH_TOKEN_EXPIRY_SECONDS * 1000)
+    );
 
     // Store the currently-valid refresh token so it can be revoked
-    // server-side on logout/password-change, instead of staying valid
-    // until natural expiry.
-    await redisClient.set(refreshTokenRedisKey(userId), refreshToken, {
-      EX: REFRESH_TOKEN_EXPIRY_SECONDS,
-    });
+    // server-side on logout / password-change. A Redis failure here must
+    // not block the login itself — the session is still issued; it just
+    // won't survive the first token refresh until Redis is healthy again.
+    try {
+      await redisClient.set(refreshTokenRedisKey(userId), refreshToken, {
+        EX: REFRESH_TOKEN_EXPIRY_SECONDS,
+      });
+    } catch (err) {
+      logger.error(
+        "Failed to persist refresh token to Redis (session still issued):",
+        err
+      );
+    }
 
     return { accessToken, refreshToken };
   };
@@ -62,39 +87,56 @@ export class TokenService {
         };
       }
     } catch (err: any) {
-      console.error("Access token validation failed:", err.message);
+      logger.error("Access token validation failed:", err?.message ?? err);
     }
 
     try {
       if (refreshToken) {
-        let decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET_KEY) as {
+        const decoded = jwt.verify(refreshToken, REFRESH_TOKEN_SECRET_KEY) as {
           id: string;
         };
 
         if (decoded.id) {
-          const storedRefreshToken = await redisClient.get(
-            refreshTokenRedisKey(decoded.id)
-          );
-          if (storedRefreshToken !== refreshToken) {
-            // Token has been revoked (logout / password change) or rotated elsewhere.
+          let stored: string | null;
+          try {
+            stored = await redisClient.get(refreshTokenRedisKey(decoded.id));
+          } catch (redisErr) {
+            // Redis unreachable — fail open so an outage doesn't sign
+            // everyone out. Revocation resumes once Redis is back.
+            logger.error(
+              "Redis unavailable during refresh-token check, allowing refresh:",
+              redisErr
+            );
+            stored = refreshToken;
+          }
+
+          // A definitive value that isn't this token (or an absent key from
+          // a logout / password-change) means the session was revoked.
+          if (stored !== refreshToken) {
             return null;
           }
 
           const tokens = await this.generateAndSaveAuthTokens(res, decoded.id);
-          refreshToken = tokens.refreshToken;
-          accessToken = tokens.accessToken;
-          return { decoded, accessToken, refreshToken };
+          return {
+            decoded,
+            accessToken: tokens.accessToken,
+            refreshToken: tokens.refreshToken,
+          };
         }
       }
     } catch (err: any) {
-      console.error("Refresh token validation failed:", err.message);
+      logger.error("Refresh token validation failed:", err?.message ?? err);
     }
 
     return null;
   };
 
   revokeRefreshToken = async (userId: string) => {
-    await redisClient.del(refreshTokenRedisKey(userId));
+    try {
+      await redisClient.del(refreshTokenRedisKey(userId));
+    } catch (err) {
+      logger.error("Failed to revoke refresh token in Redis:", err);
+    }
   };
 
   clearCookies(res: Response) {

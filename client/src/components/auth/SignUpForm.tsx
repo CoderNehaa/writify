@@ -44,6 +44,11 @@ const SignUpForm = () => {
     onSuccess: (isAvailable: boolean) => {
       setUsernameAvailable(isAvailable);
     },
+    onError: () => {
+      // Couldn't verify — don't leave the form permanently un-submittable;
+      // the backend still rejects a duplicate username on submit.
+      setUsernameAvailable(null);
+    },
   });
 
   const signUpFormik = useFormik({
@@ -64,18 +69,20 @@ const SignUpForm = () => {
       }),
   });
 
-  function handleUsernameInput(e) {
-    const username = e.target.value;
-    signUpFormik.setFieldValue("username", username);
-
-    if (username.length >= 3 && username.length <= 8) {
-      debouncedCheck(username);
-    }
-  }
-
-  const debouncedCheck = useDebouncedCallback((username) => {
+  const debouncedCheck = useDebouncedCallback((username: string) => {
     checkUsername(username);
   }, 600); // 600ms debounce
+
+  function handleUsernameInput(e: React.ChangeEvent<HTMLInputElement>) {
+    // formik.handleChange (called first in the input's onChange) already
+    // set the field value — here we just kick off the availability check.
+    const username = e.target.value;
+    if (username.length >= 3 && username.length <= 8) {
+      debouncedCheck(username);
+    } else {
+      setUsernameAvailable(null);
+    }
+  }
 
   return (
     <Card>
@@ -234,7 +241,10 @@ const SignUpForm = () => {
             className="w-full"
             variant="hero"
             disabled={
-              !signUpFormik.isValid || usernameAvailable !== true || isPending
+              !signUpFormik.isValid ||
+              usernameAvailable === false ||
+              checkingUsername ||
+              isPending
             }
           >
             Create Account

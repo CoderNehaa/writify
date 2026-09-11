@@ -13,13 +13,13 @@ export const HeroSection = () => {
 
       <div className="container relative">
         <div className="mx-auto max-w-4xl text-center animate-fade-in">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 mb-6">
-            <span className="text-sm font-medium text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-5 py-2 mb-6">
+            <span className="text-sm font-medium text-muted-foreground">
               ✨ Welcome to the Future of Content Creation
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight mb-6">
+          <h1 className="text-4xl md:text-6xl lg:text-7xl font-semibold tracking-tight mb-6">
             Share Your Ideas,
             <br />
             <span className="bg-gradient-hero bg-clip-text text-transparent">
@@ -27,7 +27,7 @@ export const HeroSection = () => {
             </span>
           </h1>
 
-          <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
+          <p className="text-lg md:text-xl text-muted-foreground font-serif mb-8 max-w-2xl mx-auto">
             Join thousands of writers who are building their audience, sharing
             knowledge, and monetizing their content on Writify.
           </p>
@@ -59,20 +59,20 @@ export const HeroSection = () => {
             </Button>
           </div>
 
-          <div className="mt-12 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto">
+          <div className="mt-16 grid grid-cols-1 sm:grid-cols-3 gap-8 max-w-2xl mx-auto border-t border-border pt-10">
             <div className="text-center">
-              <p className="text-3xl font-bold text-primary">10K+</p>
-              <p className="text-sm text-muted-foreground">Active Writers</p>
+              <p className="font-serif text-4xl font-semibold text-foreground">10K+</p>
+              <p className="text-sm text-muted-foreground mt-1">Active Writers</p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-primary">50K+</p>
-              <p className="text-sm text-muted-foreground">
+              <p className="font-serif text-4xl font-semibold text-foreground">50K+</p>
+              <p className="text-sm text-muted-foreground mt-1">
                 Articles Published
               </p>
             </div>
             <div className="text-center">
-              <p className="text-3xl font-bold text-primary">1M+</p>
-              <p className="text-sm text-muted-foreground">Monthly Readers</p>
+              <p className="font-serif text-4xl font-semibold text-foreground">1M+</p>
+              <p className="text-sm text-muted-foreground mt-1">Monthly Readers</p>
             </div>
           </div>
         </div>

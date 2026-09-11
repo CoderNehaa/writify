@@ -24,7 +24,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
     editorProps: {
       attributes: {
         class:
-          "prose prose-lg max-w-none min-h-[400px] font-serif focus:outline-none",
+          "prose prose-lg dark:prose-invert max-w-none min-h-[400px] font-serif focus:outline-none",
       },
     },
     onUpdate: ({ editor }) => onChange(editor.getHTML()),
@@ -46,8 +46,8 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
   if (!editor) return null;
 
   return (
-    <div className="border rounded-md">
-      <div className="flex flex-wrap gap-1 border-b p-2">
+    <div className="border rounded-xl overflow-hidden">
+      <div className="flex flex-wrap gap-1 border-b bg-secondary p-2">
         <Toggle
           type="button"
           size="sm"
@@ -109,7 +109,7 @@ export const RichTextEditor = ({ content, onChange }: RichTextEditorProps) => {
           <Quote className="h-4 w-4" />
         </Toggle>
       </div>
-      <div className="p-4">
+      <div className="p-5 bg-secondary/40">
         <EditorContent editor={editor} />
       </div>
     </div>

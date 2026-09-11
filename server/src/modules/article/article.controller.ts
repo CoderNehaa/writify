@@ -96,7 +96,8 @@ export class ArticleController extends BaseController {
         author?: string;
         search?: string;
       };
-      const isOwnArticles = author && author === String(req.user._id);
+      // req.user is only set when a valid session was presented (optionalAuth).
+      const isOwnArticles = !!author && author === String(req.user?._id);
 
       const data = await this.articleService.getAllFiltered({
         category,
@@ -119,9 +120,11 @@ export class ArticleController extends BaseController {
         return this.sendNotFoundResponse(res);
       }
       const authorId = (data.author as any)?._id ?? data.author;
+      // Drafts are visible only to their author; anonymous callers (no
+      // req.user) never match, so they get a 404 for anything unpublished.
       if (
         data.status !== EArticleStatus.PUBLISHED &&
-        String(authorId) !== String(req.user._id)
+        String(authorId) !== String(req.user?._id)
       ) {
         return this.sendNotFoundResponse(res);
       }

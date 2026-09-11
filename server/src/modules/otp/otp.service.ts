@@ -1,3 +1,4 @@
+import { randomInt } from "crypto";
 import { BaseService } from "../base/base.service";
 import OTPModel, { IOtp } from "./otp.schema";
 
@@ -8,8 +9,8 @@ export class OTPService extends BaseService<IOtp> {
   }
 
   async generateAndSaveOTP(email: string) {
-    const otpNum = Math.floor(100000 + Math.random() * 900000);
-    const otp = otpNum.toString();
+    // Cryptographically secure — Math.random() is predictable.
+    const otp = randomInt(100000, 1000000).toString();
     await this.model.findOneAndUpdate(
       { email },
       { otp },

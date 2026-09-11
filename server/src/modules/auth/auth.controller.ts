@@ -10,6 +10,7 @@ import { IUser } from "../user/user.type";
 import { TokenService } from "../../clients/token.service";
 import { EmailService } from "../../clients/email.service";
 import { S3Service } from "../../clients/s3.service";
+import { toSafeUser } from "../../utils/user-serializer";
 import { AUTH_RESPONSE_MESSAGES } from "../../constants/auth";
 import { FORGOT_PASSWORD_EMAIL, SIGNUP_EMAIL } from "../../constants/email";
 import { REFRESH_TOKEN_NAME, USERNAME_LENGTH } from "../../constants/auth";
@@ -53,14 +54,10 @@ export class AuthController extends BaseController {
     this.googleLogin = this.googleLogin.bind(this);
   }
 
-  // The bucket is private — `avatar` is stored as an S3 key (except for
-  // Google-account avatars, which are already a full external URL), so it
-  // must be resolved before ever being sent to a client.
-  private async serializeUser(user: any) {
-    const plain = typeof user?.toObject === "function" ? user.toObject() : { ...user };
-    plain.avatar = await this.s3Service.resolveUrl(plain.avatar);
-    return plain;
-  }
+  // Single source of truth in utils/user-serializer — strips password/__v
+  // (Google avatars are already full external URLs; resolveUrl passes
+  // those through unchanged).
+  private serializeUser = (user: any) => toSafeUser(user, this.s3Service);
 
   private async generateUniqueUsername(base: string): Promise<string> {
     const cleaned =
@@ -110,18 +107,13 @@ export class AuthController extends BaseController {
         });
       }
 
-      const { accessToken, refreshToken } =
-        await this.tokenService.generateAndSaveAuthTokens(
-          res,
-          String(user!._id)
-        );
-      return this.sendSuccessResponse<{
-        user: IUser;
-        accessToken: string;
-        refreshToken: string;
-      }>(
+      // Sets the httpOnly access/refresh cookies and stores the refresh
+      // token in Redis. The tokens are never returned in the body — the
+      // browser only ever needs the cookies.
+      await this.tokenService.generateAndSaveAuthTokens(res, String(user!._id));
+      return this.sendSuccessResponse<{ user: IUser }>(
         res,
-        { user: await this.serializeUser(user!), accessToken, refreshToken },
+        { user: await this.serializeUser(user!) },
         "Logged in successfully!"
       );
     } catch (e) {
@@ -151,18 +143,10 @@ export class AuthController extends BaseController {
         return this.sendBadRequestResponse(res, "Invalid Credentials");
       }
 
-      const { accessToken, refreshToken } =
-        await this.tokenService.generateAndSaveAuthTokens(
-          res,
-          String(user._id)
-        );
-      return this.sendSuccessResponse<{
-        user: IUser;
-        accessToken: string;
-        refreshToken: string;
-      }>(
+      await this.tokenService.generateAndSaveAuthTokens(res, String(user._id));
+      return this.sendSuccessResponse<{ user: IUser }>(
         res,
-        { user: await this.serializeUser(user), accessToken, refreshToken },
+        { user: await this.serializeUser(user) },
         "Logged in successfully!"
       );
     } catch (e) {
@@ -178,9 +162,22 @@ export class AuthController extends BaseController {
         return this.sendBadRequestResponse(res, "Email already exists");
       }
 
-      const user =
-        existingUser ||
-        (await this.userService.create({ username, email, password, fullName }));
+      let user = existingUser;
+      if (!user) {
+        // Only when creating a fresh account: make sure the username isn't
+        // already held by someone else (returns 400, not a raw E11000 500).
+        const usernameTaken = await this.userService.getOne({ username });
+        if (usernameTaken) {
+          return this.sendBadRequestResponse(res, "Username is already taken");
+        }
+        user = await this.userService.create({
+          username,
+          email,
+          password,
+          fullName,
+        });
+      }
+
       const otp = await this.otpService.generateAndSaveOTP(email);
 
       this.emailService.sendMail(
@@ -194,7 +191,15 @@ export class AuthController extends BaseController {
         await this.serializeUser(user),
         existingUser ? EXISTING_SIGNUP(email) : NEW_SIGNUP(email)
       );
-    } catch (e) {
+    } catch (e: any) {
+      // Concurrent signups can still collide between the check and the
+      // insert — surface that as a clean 400 rather than a 500.
+      if (e?.code === 11000) {
+        return this.sendBadRequestResponse(
+          res,
+          "An account with this email or username already exists"
+        );
+      }
       return this.handleError(res, e, "signup", "AuthController");
     }
   }
@@ -231,9 +236,14 @@ export class AuthController extends BaseController {
         },
         session
       );
-      this.tokenService.generateAndSaveAuthTokens(res, String(user._id));
 
       await session.commitTransaction();
+
+      // Issue the session only after the verification is durably committed,
+      // and await it so a Redis write failure surfaces as an error here
+      // rather than an unhandled rejection.
+      await this.tokenService.generateAndSaveAuthTokens(res, String(user._id));
+
       return this.sendSuccessResponse<IUser | null>(
         res,
         verifiedUser && (await this.serializeUser(verifiedUser)),
@@ -251,7 +261,7 @@ export class AuthController extends BaseController {
     try {
       const user = req.user;
       let randomPassword = this.userService.generateRandomPassword();
-      let updatedUser = await this.userService.updateById(String(user._id), {
+      await this.userService.updateById(String(user._id), {
         password: randomPassword,
       });
 
@@ -265,9 +275,10 @@ export class AuthController extends BaseController {
       // stolen refresh token) should stop working immediately.
       await this.tokenService.revokeRefreshToken(String(user._id));
 
-      return this.sendSuccessResponse<IUser | null>(
+      // This endpoint is unauthenticated — never return the user record.
+      return this.sendSuccessResponse(
         res,
-        updatedUser && (await this.serializeUser(updatedUser)),
+        null,
         "New password sent on email successfully!"
       );
     } catch (e) {
@@ -293,7 +304,10 @@ export class AuthController extends BaseController {
 
   async checkUsername(req: Request, res: Response) {
     const { username } = req.body;
-    let exists = await this.userService.getOne({ username, isVerified: true });
+    // Any non-deleted account holds the username via the partial unique
+    // index — verified or not — so don't filter by isVerified here or a
+    // "taken" name reports as available and signup then 500s on E11000.
+    let exists = await this.userService.getOne({ username });
     return this.sendSuccessResponse<{ usernameAvailable: boolean }>(res, {
       usernameAvailable: exists ? false : true,
     });

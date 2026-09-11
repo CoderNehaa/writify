@@ -13,7 +13,7 @@ import { getArticlesService } from "@/api/article";
 import { getCategoriesService } from "@/api/category";
 
 const EmptyState = ({ message }: { message: string }) => (
-  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center">
+  <div className="flex flex-col items-center justify-center gap-3 py-16 text-center rounded-2xl border border-dashed">
     <Inbox className="h-10 w-10 text-muted-foreground" />
     <p className="text-muted-foreground">{message}</p>
   </div>

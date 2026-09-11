@@ -2,11 +2,20 @@ export const ACCESS_TOKEN_NAME = "access_token";
 export const REFRESH_TOKEN_NAME = "refresh_token";
 export const ACCESS_TOKEN_EXPIRY_TIME = "1h";
 export const REFRESH_TOKEN_EXPIRY_TIME = "7d";
+export const ACCESS_TOKEN_EXPIRY_SECONDS = 60 * 60;
 export const REFRESH_TOKEN_EXPIRY_SECONDS = 7 * 24 * 60 * 60;
 
 export const AUTH_RATE_LIMIT = {
   WINDOW_MS: 15 * 60 * 1000, // 15 minutes
   MAX_ATTEMPTS: 10,
+};
+
+// Username availability is polled while typing (debounced), so it needs a
+// far more generous budget than login/signup — this is only here to cap
+// scripted enumeration.
+export const USERNAME_CHECK_RATE_LIMIT = {
+  WINDOW_MS: 15 * 60 * 1000,
+  MAX_ATTEMPTS: 100,
 };
 
 export const passwordRegex = new RegExp(
