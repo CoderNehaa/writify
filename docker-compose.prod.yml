@@ -1,0 +1,19 @@
+services:
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  server:
+    build:
+      context: ./server
+    restart: unless-stopped
+    ports:
+      # Bound to loopback only — Nginx on the host is the sole entry point.
+      - "127.0.0.1:8088:8088"
+    environment:
+      # Not sensitive — just tells entrypoint.sh which SSM parameter to
+      # fetch. All actual config/secrets live in that SecureString
+      # parameter, pulled at container start via the EC2 instance's IAM role.
+      - SSM_PARAMETER_NAME=/writify/prod/server-env
+    depends_on:
+      - redis
